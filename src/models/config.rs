@@ -19,7 +19,7 @@ pub struct Chat {
     pub api: ChatApi,
     colors: ChatColors,
     pub model: ChatModel,
-    pub roles: Vec<HashMap<String, String>>,
+    pub roles: HashMap<String, String>,
 }
 
 #[derive(Debug, Deserialize)]

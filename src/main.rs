@@ -22,12 +22,7 @@ async fn main() {
     let toml_str = fs::read_to_string(config_path).expect("Failed to read config file");
     let config: ChatConfig = toml::from_str(&toml_str).expect("Failed to deserialize config.toml");
 
-    let system_role = config.chat.roles
-        .iter()
-        .find(|role| role.contains_key(&config.chat.default_system_role))
-        .unwrap()
-        .get(&config.chat.default_system_role)
-        .unwrap();
+    let system_role = config.chat.roles.get(&config.chat.default_system_role).unwrap();
 
     let mut conversation = OpenAIRequest {
         model: config.chat.model.model_name,
