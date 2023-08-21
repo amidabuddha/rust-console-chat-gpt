@@ -1,4 +1,6 @@
 #![allow(unused)]
+use std::collections::HashMap;
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -14,14 +16,14 @@ pub struct OpenAIRequest {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct OpenAIResponseChoices {
+pub struct OpenAIResponseChoices {
     index: usize,
-    message: OpenAIMessage,
+    pub message: OpenAIMessage,
     finish_reason: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct OpenAIResponseUsage {
+pub struct OpenAIResponseUsage {
     prompt_tokens: usize,
     completion_tokens: usize,
     total_tokens: usize,
@@ -33,6 +35,6 @@ pub struct OpenAIResponse {
     object: String,
     created: usize,
     model: String,
-    choices: Vec<OpenAIResponseChoices>,
-    usage: OpenAIResponseUsage,
+    pub choices: Vec<OpenAIResponseChoices>,
+    pub usage: OpenAIResponseUsage,
 }

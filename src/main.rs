@@ -10,7 +10,8 @@ mod models {
 
 use models::api::OpenAIMessage;
 use models::api::OpenAIRequest;
-// use models::api::OpenAIResponse;
+use models::api::OpenAIResponse;
+use models::api::OpenAIResponseChoices;
 use models::config::ChatConfig;
 
 #[tokio::main]
@@ -50,14 +51,20 @@ async fn main() {
     let url = format!("{}{}", config.chat.api.base_url, config.chat.api.endpoint);
     let api_key = config.chat.api.api_key;
     let client = reqwest::Client::new();
-    let response = client
+    let response: OpenAIResponse = client
         .post(&url)
         .header(AUTHORIZATION, format!("Bearer {}", api_key))
         .header(CONTENT_TYPE, "application/json")
         .header(ACCEPT, "application/json")
         .json(&conversation)
         .send()
-        .await;
+        .await
+        .expect("Failed to get response:")
+        .json()
+        .await
+        .expect("Failed to get payload:");
 
-    println!("{:#?}", response.unwrap().text().await);
+    let choices: Vec<OpenAIResponseChoices> = response.choices;
+    let message = &choices[0].message;
+    println!("Assistant: {}", message.content);
 }
