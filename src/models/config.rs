@@ -9,13 +9,13 @@ pub struct ChatConfig {
 
 #[derive(Debug, Deserialize)]
 pub struct Chat {
-    temperature: usize,
-    adjust_temperature: bool,
+    pub temperature: usize,
+    pub adjust_temperature: bool,
     pub default_system_role: String,
     pub role_selector: bool,
     pub save_chat_on_exit: bool,
-    debug: bool,
-    last_completion_max_tokens: usize,
+    pub debug: bool,
+    pub last_completion_max_tokens: usize,
     pub api: ChatApi,
     pub colors: ChatColors,
     pub model: ChatModel,

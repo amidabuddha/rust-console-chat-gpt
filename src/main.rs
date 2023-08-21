@@ -1,11 +1,14 @@
-use std::env;
-use std::fs;
+use std::env::current_dir;
+use std::fs::{create_dir_all, read_to_string};
 use std::path::PathBuf;
-use toml;
+use toml::from_str;
+use colored::Colorize;
+use chrono::prelude::*;
 
 mod utils;
 use utils::get_user_input;
 use utils::get_openai_response;
+use utils::save_chat;
 
 mod models {
     pub mod api;
@@ -20,19 +23,29 @@ use models::config::ChatConfig;
 
 #[tokio::main]
 async fn main() {
-    let base_path: PathBuf = env::current_dir().unwrap();
+    let base_path: PathBuf = current_dir().unwrap();
     let config_path: PathBuf = base_path.join("config.toml");
-    let toml_str: String = fs::read_to_string(config_path).expect("Failed to read config file");
-    let config: ChatConfig = toml::from_str(&toml_str).expect("Failed to deserialize config.toml");
+    let chat_path: PathBuf = base_path.join("chats");
+    if !chat_path.exists() {
+        create_dir_all(&chat_path).unwrap();
+    }
+    let toml_str: String = read_to_string(config_path).expect("Failed to read config file");
+    let config: ChatConfig = from_str(&toml_str).expect("Failed to deserialize config.toml");
     let url: String = format!("{}{}", config.chat.api.base_url, config.chat.api.endpoint);
     let api_key: String = config.chat.api.api_key;
+    let default_role: String = config.chat.default_system_role;
+    let user_label_color: String = config.chat.colors.user_prompt;
+    let assistant_label_color: String = config.chat.colors.assistant_prompt;
+    let assistant_prompt_color: String = config.chat.colors.assistant_response;
+    let save_on_exit: bool = config.chat.save_chat_on_exit;
+    let debug: bool = config.chat.debug;
 
     // implement temperature_selector
     // implement role_selector
     let system_role: &String = config
         .chat
         .roles
-        .get(&config.chat.default_system_role)
+        .get(&default_role)
         .unwrap();
 
     let mut conversation: OpenAIRequest = OpenAIRequest {
@@ -43,29 +56,32 @@ async fn main() {
         }],
     };
     loop {
-        let user_input: String = get_user_input();
+        let user_input: String = get_user_input(&user_label_color);
         match user_input.as_str() {
+            "" => {
+                println!("Please enter your message!");
+                continue;
+            }
             "exit" => {
                 println!("Goodbye!");
-                if config.chat.save_chat_on_exit{
-                    //save funtion
-                    println!("To be saved...")
+                if save_on_exit {
+                    let timestamp = Utc::now().format("%Y-%m-%d_%H-%M-%S").to_string();
+                    let file_name = format!("{}{}", timestamp, ".json".to_string());
+                    save_chat(file_name.to_string(), &chat_path, &conversation);
+                    println!("{} saved to {:#?}", &file_name, chat_path);
                 }
                 break;
             },
             "flush" => {println!("Are you sure?"); String::new()},
-            "help" => {println!("Are you sure?"); String::new()}
+            "help" | "command" => {println!("Are you sure?"); String::new()}
             _ => user_input.to_string()
         };
         /*
         implement cost
         implement edit
-        implement exit
         implement file
-        implement flush
         implement format
         implement save
-        implement help | commands
         */
 
         let user_message: OpenAIMessage = OpenAIMessage {
@@ -79,8 +95,11 @@ async fn main() {
 
         let choices: Vec<OpenAIResponseChoices> = response.choices;
         let assistant_message: OpenAIMessage = choices[0].message.clone();
-        println!("Assistant: {}", assistant_message.content);
+        println!("{} {}", "Assistant: ".color(assistant_label_color.to_string()), assistant_message.content.color(assistant_prompt_color.to_string()));
         conversation.messages.push(assistant_message);
-        // println!("{:#?}", conversation);
+        if debug {
+            // println!("{:#?}", conversation);
+            save_chat("messages.json".to_string(), &base_path, &conversation);
+        }
     }
 }

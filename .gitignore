@@ -22,3 +22,5 @@ Cargo.lock
 
 # Exclude config
 config.toml
+messages.json
+/chats
