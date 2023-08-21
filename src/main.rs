@@ -1,7 +1,8 @@
-use reqwest;
+use reqwest::{self, Client};
 use reqwest::header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE};
 use std::fs;
 use std::env;
+use std::path::PathBuf;
 use toml;
 
 mod models {
@@ -17,14 +18,13 @@ use models::config::ChatConfig;
 
 #[tokio::main]
 async fn main() {
-    let base_path = env::current_dir().unwrap();
-    let config_path = base_path.join("config.toml");
-    let toml_str = fs::read_to_string(config_path).expect("Failed to read config file");
+    let base_path: PathBuf = env::current_dir().unwrap();
+    let config_path: PathBuf = base_path.join("config.toml");
+    let toml_str: String = fs::read_to_string(config_path).expect("Failed to read config file");
     let config: ChatConfig = toml::from_str(&toml_str).expect("Failed to deserialize config.toml");
+    let system_role: &String = config.chat.roles.get(&config.chat.default_system_role).unwrap();
 
-    let system_role = config.chat.roles.get(&config.chat.default_system_role).unwrap();
-
-    let mut conversation = OpenAIRequest {
+    let mut conversation:OpenAIRequest = OpenAIRequest {
         model: config.chat.model.model_name,
         messages: vec![
             OpenAIMessage {
@@ -35,7 +35,7 @@ async fn main() {
     };
 
     // New OpenAIMessage instance to add
-    let user_message = OpenAIMessage {
+    let user_message:OpenAIMessage = OpenAIMessage {
         role: "user".to_string(),
         content: "Hi!".to_string(),
     };
@@ -43,9 +43,9 @@ async fn main() {
     // Adding the new instance to the vector
     conversation.messages.push(user_message);
 
-    let url = format!("{}{}", config.chat.api.base_url, config.chat.api.endpoint);
-    let api_key = config.chat.api.api_key;
-    let client = reqwest::Client::new();
+    let url: String = format!("{}{}", config.chat.api.base_url, config.chat.api.endpoint);
+    let api_key: String = config.chat.api.api_key;
+    let client: Client = reqwest::Client::new();
     let response: OpenAIResponse = client
         .post(&url)
         .header(AUTHORIZATION, format!("Bearer {}", api_key))
