@@ -26,6 +26,9 @@ async fn main() {
     let config: ChatConfig = toml::from_str(&toml_str).expect("Failed to deserialize config.toml");
     let url: String = format!("{}{}", config.chat.api.base_url, config.chat.api.endpoint);
     let api_key: String = config.chat.api.api_key;
+
+    // implement temperature_selector
+    // implement role_selector
     let system_role: &String = config
         .chat
         .roles
@@ -41,6 +44,29 @@ async fn main() {
     };
     loop {
         let user_input: String = get_user_input();
+        match user_input.as_str() {
+            "exit" => {
+                println!("Goodbye!");
+                if config.chat.save_chat_on_exit{
+                    //save funtion
+                    println!("To be saved...")
+                }
+                break;
+            },
+            "flush" => {println!("Are you sure?"); String::new()},
+            "help" => {println!("Are you sure?"); String::new()}
+            _ => user_input.to_string()
+        };
+        /*
+        implement cost
+        implement edit
+        implement exit
+        implement file
+        implement flush
+        implement format
+        implement save
+        implement help | commands
+        */
 
         let user_message: OpenAIMessage = OpenAIMessage {
             role: "user".to_string(),

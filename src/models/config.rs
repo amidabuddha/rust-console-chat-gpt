@@ -12,12 +12,12 @@ pub struct Chat {
     temperature: usize,
     adjust_temperature: bool,
     pub default_system_role: String,
-    role_selector: bool,
-    save_chat_on_exit: bool,
+    pub role_selector: bool,
+    pub save_chat_on_exit: bool,
     debug: bool,
     last_completion_max_tokens: usize,
     pub api: ChatApi,
-    colors: ChatColors,
+    pub colors: ChatColors,
     pub model: ChatModel,
     pub roles: HashMap<String, String>,
 }
@@ -31,11 +31,11 @@ pub struct ChatApi {
 }
 
 #[derive(Debug, Deserialize)]
-struct ChatColors {
+pub struct ChatColors {
     code: String,
-    user_prompt: String,
-    assistant_prompt: String,
-    assistant_response: String,
+    pub user_prompt: String,
+    pub assistant_prompt: String,
+    pub assistant_response: String,
 }
 
 #[derive(Debug, Deserialize)]
