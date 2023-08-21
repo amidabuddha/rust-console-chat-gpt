@@ -1,6 +1,7 @@
 use reqwest;
 use reqwest::header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE};
 use std::fs;
+use std::env;
 use toml;
 
 mod models {
@@ -16,17 +17,16 @@ use models::config::ChatConfig;
 
 #[tokio::main]
 async fn main() {
-    // TODO change this to be %appdata%
-    let base_path = "/Users/stefan/Documents/Playground/OpenAI/rust-console-chat-gpt";
-    let config_path = format!("{}/config.toml", base_path);
+    let base_path = env::current_dir().unwrap();
+    let config_path = base_path.join("config.toml");
     let toml_str = fs::read_to_string(config_path).expect("Failed to read config file");
     let config: ChatConfig = toml::from_str(&toml_str).expect("Failed to deserialize config.toml");
 
     let system_role = config.chat.roles
         .iter()
-        .find(|role| role.contains_key("dev"))
+        .find(|role| role.contains_key(&config.chat.default_system_role))
         .unwrap()
-        .get("dev")
+        .get(&config.chat.default_system_role)
         .unwrap();
 
     let mut conversation = OpenAIRequest {
@@ -59,12 +59,14 @@ async fn main() {
         .json(&conversation)
         .send()
         .await
-        .expect("Failed to get response:")
+        .expect("Failed to get response")
         .json()
         .await
-        .expect("Failed to get payload:");
+        .expect("Failed to get payload");
 
     let choices: Vec<OpenAIResponseChoices> = response.choices;
-    let message = &choices[0].message;
-    println!("Assistant: {}", message.content);
+    let assistant_message: OpenAIMessage = choices[0].message.clone();
+    println!("Assistant: {}", assistant_message.content);
+    conversation.messages.push(assistant_message);
+    // println!("{:#?}", conversation);
 }

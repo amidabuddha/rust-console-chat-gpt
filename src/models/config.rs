@@ -11,7 +11,7 @@ pub struct ChatConfig {
 pub struct Chat {
     temperature: usize,
     adjust_temperature: bool,
-    default_system_role: String,
+    pub default_system_role: String,
     role_selector: bool,
     save_chat_on_exit: bool,
     debug: bool,

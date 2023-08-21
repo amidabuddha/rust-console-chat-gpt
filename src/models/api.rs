@@ -1,9 +1,7 @@
 #![allow(unused)]
-use std::collections::HashMap;
-
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct OpenAIMessage {
     pub role: String,
     pub content: String,
