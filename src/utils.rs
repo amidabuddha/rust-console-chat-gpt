@@ -40,6 +40,7 @@ pub fn get_user_input(user_prompt_color: &str) -> String {
 
 pub fn save_chat (name: String, path: &PathBuf, conversation: &OpenAIRequest){
     let json = to_string_pretty(&conversation).expect("Serialization failed");
-    let mut file = File::create(path.join(name)).expect("File creation failed");
+    let mut file = File::create(path.join(&name)).expect("File creation failed");
     file.write_all(json.as_bytes()).expect("Write failed");
+    println!("{:#?} saved to {:#?}", name, &path);
 }

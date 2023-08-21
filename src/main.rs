@@ -68,7 +68,6 @@ async fn main() {
                     let timestamp = Utc::now().format("%Y-%m-%d_%H-%M-%S").to_string();
                     let file_name = format!("{}{}", timestamp, ".json".to_string());
                     save_chat(file_name.to_string(), &chat_path, &conversation);
-                    println!("{} saved to {:#?}", &file_name, chat_path);
                 }
                 break;
             },
