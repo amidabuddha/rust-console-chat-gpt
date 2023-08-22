@@ -1,24 +1,32 @@
 use chrono::prelude::*;
-use colored::Colorize;
 use reqwest::header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE};
 use reqwest::{self, Client};
-use serde_json::to_string_pretty;
+use serde_json;
 use std::fs::File;
-use std::io::{stdin, stdout, Write};
+use std::io::{self, Write};
 use std::path::PathBuf;
 
-use super::models::api::OpenAIRequest;
-use super::models::api::OpenAIResponse;
+use super::models::api::{OpenAIRequest, OpenAIResponse};
+use super::models::enums::UserAction;
 
-pub fn get_user_input(user_prompt_color: &str) -> String {
-    let mut user_input_raw: String = String::new();
-    print!("{}", "User: ".color(user_prompt_color.to_string()));
-    let _ = stdout().flush();
-    stdin()
-        .read_line(&mut user_input_raw)
-        .expect("Failed to read input");
-    let user_input = user_input_raw.trim().to_string();
-    user_input
+pub fn get_user_input() ->  Option<UserAction> {
+    print!("User: ");
+    let mut user_input = String::new();
+    io::stdout().flush().unwrap();
+    match io::stdin().read_line(&mut user_input) {
+        Ok(_) => {
+            let input = user_input.trim().to_lowercase();
+            match input.as_str() {
+                "" => Some(UserAction::Empty),
+                "exit" | "quit" | "bye" => Some(UserAction::Exit),
+                "flush" => Some(UserAction::Flush),
+                "help" | "command" => Some(UserAction::Help),
+                "save" => Some(UserAction::Save),
+                _ => Some(UserAction::Input(input.to_string())),
+            }
+        }
+        Err(_) => None,
+    }
 }
 
 pub async fn get_openai_response(
@@ -50,7 +58,7 @@ pub fn save_chat(name: String, path: &PathBuf, conversation: &OpenAIRequest) {
     } else {
         name
     };
-    let json = to_string_pretty(&conversation).expect("Serialization failed");
+    let json = serde_json::to_string_pretty(&conversation).expect("Serialization failed");
     let mut file = File::create(path.join(&file_name)).expect("File creation failed");
     file.write_all(json.as_bytes()).expect("Write failed");
     println!("{} saved to {:?}", &file_name, &path);
