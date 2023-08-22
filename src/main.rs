@@ -3,7 +3,6 @@ use std::fs::{create_dir_all, read_to_string};
 use std::path::PathBuf;
 use toml::from_str;
 use colored::Colorize;
-use chrono::prelude::*;
 
 mod utils;
 use utils::get_user_input;
@@ -65,11 +64,13 @@ async fn main() {
             "exit" => {
                 println!("Goodbye!");
                 if save_on_exit {
-                    let timestamp = Utc::now().format("%Y-%m-%d_%H-%M-%S").to_string();
-                    let file_name = format!("{}{}", timestamp, ".json".to_string());
-                    save_chat(file_name.to_string(), &chat_path, &conversation);
+                    save_chat("".to_string(), &chat_path, &conversation);
                 }
                 break;
+            },
+            "save" => {
+                save_chat("".to_string(), &chat_path, &conversation);
+                return;
             },
             "flush" => {println!("Are you sure?"); String::new()},
             "help" | "command" => {println!("Are you sure?"); String::new()}
