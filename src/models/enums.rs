@@ -1,8 +1,8 @@
 pub enum UserAction {
-    Empty,
-    Exit,
-    Flush,
-    Help,
-    Save,
-    Input(String),
+    NONE,
+    EXIT,
+    FLUSH,
+    HELP,
+    SAVE,
+    INPUT(String),
 }

@@ -17,12 +17,12 @@ pub fn get_user_input() ->  Option<UserAction> {
         Ok(_) => {
             let input = user_input.trim().to_lowercase();
             match input.as_str() {
-                "" => Some(UserAction::Empty),
-                "exit" | "quit" | "bye" => Some(UserAction::Exit),
-                "flush" => Some(UserAction::Flush),
-                "help" | "command" => Some(UserAction::Help),
-                "save" => Some(UserAction::Save),
-                _ => Some(UserAction::Input(input.to_string())),
+                "" => Some(UserAction::NONE),
+                "exit" | "quit" | "bye" => Some(UserAction::EXIT),
+                "flush" => Some(UserAction::FLUSH),
+                "help" | "command" => Some(UserAction::HELP),
+                "save" => Some(UserAction::SAVE),
+                _ => Some(UserAction::INPUT(input.to_string())),
             }
         }
         Err(_) => None,
@@ -33,7 +33,7 @@ pub async fn get_openai_response(
     url: &str,
     api_key: &str,
     conversation: &OpenAIRequest,
-) -> OpenAIResponse {
+) -> Result<OpenAIResponse, reqwest::Error> {
     let client: Client = reqwest::Client::new();
     let response: OpenAIResponse = client
         .post(url)
@@ -42,13 +42,11 @@ pub async fn get_openai_response(
         .header(ACCEPT, "application/json")
         .json(&conversation)
         .send()
-        .await
-        .expect("Failed to get response")
+        .await?
         .json()
-        .await
-        .expect("Failed to get payload");
+        .await?;
 
-    response
+    Ok(response)
 }
 
 pub fn save_chat(name: String, path: &PathBuf, conversation: &OpenAIRequest) {

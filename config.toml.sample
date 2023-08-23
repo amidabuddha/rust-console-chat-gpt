@@ -19,7 +19,6 @@ endpoint = "/v1/chat/completions"
 api_usage = 0
 
 [chat.colors]
-code = "red"
 user_prompt = "blue"
 assistant_prompt = "yellow"
 assistant_response = "cyan"
