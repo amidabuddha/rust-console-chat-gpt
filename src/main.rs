@@ -14,6 +14,9 @@ mod models {
 use models::config::ChatConfig;
 use models::enums::{Roles, UserActions};
 
+mod styling;
+use styling::handle_code;
+
 mod utils;
 use utils::{get_openai_response, get_user_input, init_conversation_message, set_message};
 
@@ -77,12 +80,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
                 let choices = response.choices;
                 let assistant_message = choices[0].message.clone();
-                println!(
-                    "{} {}",
-                    "Assistant:".color(chat_config.chat.colors.assistant_prompt.to_string()),
-                    assistant_message
-                        .content
-                        .color(chat_config.chat.colors.assistant_response.to_string())
+                print!(
+                    "{} ",
+                    "Assistant:".color(chat_config.chat.colors.assistant_prompt.to_string())
+                );
+                handle_code(
+                    assistant_message.content.to_string(),
+                    chat_config.chat.colors.assistant_response.to_string(),
                 );
                 conversation.messages.push(assistant_message);
                 if chat_config.chat.debug {
