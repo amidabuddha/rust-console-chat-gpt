@@ -37,7 +37,7 @@ pub fn get_user_input() -> Option<UserActions> {
                 "" => Some(UserActions::NONE),
                 "exit" | "quit" | "bye" => Some(UserActions::EXIT),
                 "flush" => Some(UserActions::FLUSH),
-                "help" | "command" => Some(UserActions::HELP),
+                "help" | "commands" => Some(UserActions::HELP),
                 "save" => Some(UserActions::SAVE),
                 _ => Some(UserActions::INPUT(input.to_string())),
             }
