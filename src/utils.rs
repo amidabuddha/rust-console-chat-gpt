@@ -1,15 +1,32 @@
-use chrono::prelude::*;
 use reqwest::header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE};
 use reqwest::{self, Client};
-use serde_json;
-use std::fs::File;
 use std::io::{self, Write};
-use std::path::PathBuf;
 
-use super::models::api::{OpenAIRequest, OpenAIResponse};
-use super::models::enums::UserAction;
+use super::models::api::{OpenAIMessage, OpenAIRequest, OpenAIResponse};
+use super::models::config::ChatConfig;
+use super::models::enums::{Roles, UserActions};
 
-pub fn get_user_input() -> Option<UserAction> {
+pub fn set_system_role(chat_config: &ChatConfig) -> String {
+    return chat_config
+        .chat
+        .roles
+        .get(&chat_config.chat.default_system_role)
+        .unwrap()
+        .to_string();
+}
+
+pub fn init_conversation_message(chat_config: &ChatConfig) -> OpenAIRequest {
+    let system_role = set_system_role(chat_config);
+
+    let conversation: OpenAIRequest = OpenAIRequest {
+        model: chat_config.chat.model.model_name.to_string(),
+        messages: vec![set_message(Roles::SYSTEM, system_role)],
+    };
+
+    return conversation;
+}
+
+pub fn get_user_input() -> Option<UserActions> {
     print!("User: ");
     let mut user_input = String::new();
     io::stdout().flush().unwrap();
@@ -17,16 +34,25 @@ pub fn get_user_input() -> Option<UserAction> {
         Ok(_) => {
             let input = user_input.trim().to_lowercase();
             match input.as_str() {
-                "" => Some(UserAction::NONE),
-                "exit" | "quit" | "bye" => Some(UserAction::EXIT),
-                "flush" => Some(UserAction::FLUSH),
-                "help" | "command" => Some(UserAction::HELP),
-                "save" => Some(UserAction::SAVE),
-                _ => Some(UserAction::INPUT(input.to_string())),
+                "" => Some(UserActions::NONE),
+                "exit" | "quit" | "bye" => Some(UserActions::EXIT),
+                "flush" => Some(UserActions::FLUSH),
+                "help" | "command" => Some(UserActions::HELP),
+                "save" => Some(UserActions::SAVE),
+                _ => Some(UserActions::INPUT(input.to_string())),
             }
         }
         Err(_) => None,
     }
+}
+
+pub fn set_message(actor: Roles, input: String) -> OpenAIMessage {
+    let message = OpenAIMessage {
+        role: actor.as_str().to_string(),
+        content: input,
+    };
+
+    return message;
 }
 
 pub async fn get_openai_response(
@@ -47,17 +73,4 @@ pub async fn get_openai_response(
         .await?;
 
     Ok(response)
-}
-
-pub fn save_chat(name: String, path: &PathBuf, conversation: &OpenAIRequest) {
-    let timestamp = Utc::now().format("%Y-%m-%d_%H-%M-%S").to_string();
-    let file_name = if name == "" {
-        format!("{timestamp}{}", ".json".to_string())
-    } else {
-        name
-    };
-    let json = serde_json::to_string_pretty(&conversation).expect("Serialization failed");
-    let mut file = File::create(path.join(&file_name)).expect("File creation failed");
-    file.write_all(json.as_bytes()).expect("Write failed");
-    println!("{} saved to {:?}", &file_name, &path);
 }

@@ -2,17 +2,19 @@ use std::env;
 use std::fs;
 use toml;
 
-mod utils;
-use utils::{get_openai_response, get_user_input, save_chat};
+mod features;
+use features::{help_info, save_chat};
 
 mod models {
     pub mod api;
     pub mod config;
     pub mod enums;
 }
-use models::api::{OpenAIMessage, OpenAIRequest};
 use models::config::ChatConfig;
-use models::enums::UserAction;
+use models::enums::{Roles, UserActions};
+
+mod utils;
+use utils::{get_openai_response, get_user_input, init_conversation_message, set_message};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -26,25 +28,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let chat_config: ChatConfig = toml::from_str(&toml_str)?;
     let url = format!(
         "{}{}",
-        chat_config.chat.api.base_url, chat_config.chat.api.endpoint
+        &chat_config.chat.api.base_url, &chat_config.chat.api.endpoint
     );
-    let api_key = chat_config.chat.api.api_key;
+    let api_key = &chat_config.chat.api.api_key;
 
-    // implement temperature_selector
-    // implement role_selector
-    let system_role = chat_config
-        .chat
-        .roles
-        .get(&chat_config.chat.default_system_role)
-        .unwrap();
-
-    let mut conversation: OpenAIRequest = OpenAIRequest {
-        model: chat_config.chat.model.model_name,
-        messages: vec![OpenAIMessage {
-            role: "system".to_string(),
-            content: system_role.to_string(),
-        }],
-    };
+    // TODO: implement temperature_selector
+    // TODO: mplement role_selector
+    let mut conversation = init_conversation_message(&chat_config);
 
     while let Some(user_input) = get_user_input() {
         match user_input {
@@ -54,34 +44,33 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             implement file
             implement format
             */
-            UserAction::NONE => {
+            UserActions::NONE => {
                 println!("Please enter your message!");
                 continue;
             }
-            UserAction::EXIT => {
+            UserActions::EXIT => {
                 println!("Goodbye!");
                 if chat_config.chat.save_chat_on_exit {
                     save_chat("".to_string(), &chat_path, &conversation);
                 };
                 break;
             }
-            UserAction::FLUSH => {
-                println!("Are you sure?");
+            UserActions::FLUSH => {
+                if chat_config.chat.save_chat_on_exit {
+                    save_chat("".to_string(), &chat_path, &conversation);
+                };
+                conversation = init_conversation_message(&chat_config);
                 continue;
             }
-            UserAction::HELP => {
-                println!("Are you sure?");
+            UserActions::HELP | UserActions::COMMANDS => {
+                help_info();
                 continue;
             }
-            UserAction::SAVE => {
+            UserActions::SAVE => {
                 save_chat("".to_string(), &chat_path, &conversation);
             }
-            UserAction::INPUT(input) => {
-                let user_message = OpenAIMessage {
-                    role: "user".to_string(),
-                    content: input,
-                };
-                conversation.messages.push(user_message);
+            UserActions::INPUT(input) => {
+                conversation.messages.push(set_message(Roles::USER, input));
 
                 let response = get_openai_response(&url, &api_key, &conversation).await?;
 
