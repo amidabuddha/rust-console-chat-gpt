@@ -1,3 +1,4 @@
+use colored::*;
 use std::env;
 use std::fs;
 use toml;
@@ -36,7 +37,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // TODO: mplement role_selector
     let mut conversation = init_conversation_message(&chat_config);
 
-    while let Some(user_input) = get_user_input() {
+    while let Some(user_input) = get_user_input(&chat_config.chat.colors.user_prompt) {
         match user_input {
             /*
             implement cost
@@ -76,7 +77,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
                 let choices = response.choices;
                 let assistant_message = choices[0].message.clone();
-                println!("Assistant: {}", assistant_message.content);
+                println!(
+                    "{} {}",
+                    "Assistant:".color(chat_config.chat.colors.assistant_prompt.to_string()),
+                    assistant_message
+                        .content
+                        .color(chat_config.chat.colors.assistant_response.to_string())
+                );
                 conversation.messages.push(assistant_message);
                 if chat_config.chat.debug {
                     // println!("{:#?}", conversation);

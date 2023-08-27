@@ -1,3 +1,4 @@
+use colored::*;
 use reqwest::header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE};
 use reqwest::{self, Client};
 use std::io::{self, Write};
@@ -26,8 +27,8 @@ pub fn init_conversation_message(chat_config: &ChatConfig) -> OpenAIRequest {
     return conversation;
 }
 
-pub fn get_user_input() -> Option<UserActions> {
-    print!("User: ");
+pub fn get_user_input(user_prompt_color: &String) -> Option<UserActions> {
+    print!("{} ", "User:".color(user_prompt_color.to_string()));
     let mut user_input = String::new();
     io::stdout().flush().unwrap();
     match io::stdin().read_line(&mut user_input) {
