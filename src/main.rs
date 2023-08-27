@@ -24,7 +24,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
     let toml_str = fs::read_to_string(config_path)?;
     let chat_config: ChatConfig = toml::from_str(&toml_str)?;
-    let url = format!("{}{}", chat_config.chat.api.base_url, chat_config.chat.api.endpoint);
+    let url = format!(
+        "{}{}",
+        chat_config.chat.api.base_url, chat_config.chat.api.endpoint
+    );
     let api_key = chat_config.chat.api.api_key;
 
     // implement temperature_selector

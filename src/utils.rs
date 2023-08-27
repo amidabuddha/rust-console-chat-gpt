@@ -9,7 +9,7 @@ use std::path::PathBuf;
 use super::models::api::{OpenAIRequest, OpenAIResponse};
 use super::models::enums::UserAction;
 
-pub fn get_user_input() ->  Option<UserAction> {
+pub fn get_user_input() -> Option<UserAction> {
     print!("User: ");
     let mut user_input = String::new();
     io::stdout().flush().unwrap();
