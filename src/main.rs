@@ -44,7 +44,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         match user_input {
             /*
             implement cost
-            implement edit
             implement file
             implement format
             */
@@ -88,7 +87,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 let response = get_openai_response(&url, &api_key, &conversation).await?;
 
                 let choices = response.choices;
-                let assistant_message = choices[0].message.clone();
+                let assistant_message = &choices[0].message;
                 print!(
                     "{} ",
                     "Assistant:".color(chat_config.chat.colors.assistant_prompt.to_string())
@@ -97,7 +96,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     assistant_message.content.to_string(),
                     chat_config.chat.colors.assistant_response.to_string(),
                 );
-                conversation.messages.push(assistant_message);
+                conversation.messages.push(assistant_message.clone());
                 if chat_config.chat.debug {
                     // println!("{:#?}", conversation);
                     save_chat("messages.json".to_string(), &base_path, &conversation);
