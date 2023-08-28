@@ -4,7 +4,7 @@ use std::fs;
 use toml;
 
 mod features;
-use features::{help_info, save_chat};
+use features::{edit_latest, help_info, save_chat};
 
 mod models {
     pub mod api;
@@ -50,6 +50,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             */
             UserActions::NONE => {
                 println!("Please enter your message!");
+                continue;
+            }
+            UserActions::EDIT => {
+                if conversation.messages.len() < 2 {
+                    println!("Seems like your chat has not started yet...");
+                } else {
+                    save_chat("".to_string(), &chat_path, &conversation);
+                    conversation = edit_latest(conversation);
+                }
                 continue;
             }
             UserActions::EXIT => {

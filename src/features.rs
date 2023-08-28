@@ -26,9 +26,9 @@ pub fn help_info() {
     Prints the available commands
     */
     println!("You can use the following commands:");
-    let commands: [UserActions; 5] = [
+    let commands: [UserActions; 6] = [
         // UserActions::COST,
-        // UserActions::EDIT,
+        UserActions::EDIT,
         UserActions::EXIT,
         // UserActions::FILE,
         UserActions::FLUSH,
@@ -40,4 +40,15 @@ pub fn help_info() {
     for command in commands {
         println!("{}", command.description());
     }
+}
+
+pub fn edit_latest(mut conversation: OpenAIRequest) -> OpenAIRequest {
+    if conversation.messages.last().unwrap().role == "assistant" {
+        conversation.messages.pop();
+    }
+    println!("This was the last User message in the conversation. You may rewrite it or type a new one instead:");
+    println!("{:#?}", conversation.messages.last().unwrap().content);
+    conversation.messages.pop();
+
+    conversation
 }

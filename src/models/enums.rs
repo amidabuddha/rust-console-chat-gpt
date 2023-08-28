@@ -1,7 +1,7 @@
 pub enum UserActions {
     NONE,
     // COST,
-    // EDIT,
+    EDIT,
     EXIT,
     // FILE,
     FLUSH,
@@ -17,7 +17,9 @@ impl UserActions {
         match self {
             UserActions::NONE => "",
             // UserActions::COST => "\tcost - Display conversation costs.",
-            // UserActions::EDIT => "\tedit - Edit the latest User message. Last Assistant reply will be lost.",
+            UserActions::EDIT => {
+                "\tedit - Edit the latest User message. Last Assistant reply will be lost."
+            }
             UserActions::EXIT => "\texit - Exit the program.",
             // UserActions::FILE => "\tfile - Submit long text from a file to the chat.",
             UserActions::FLUSH => "\tflush - Start a new conversation.",
