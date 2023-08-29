@@ -20,7 +20,7 @@ fn code_coloring(code: &str, lang: &str) {
     let ts = ThemeSet::load_defaults();
 
     let syntax = ps
-        .find_syntax_by_name(lang)
+        .find_syntax_by_token(lang)
         .unwrap_or_else(|| ps.find_syntax_plain_text());
     let mut h = HighlightLines::new(syntax, &ts.themes["base16-ocean.dark"]);
     for line in LinesWithEndings::from(&code) {
@@ -31,7 +31,7 @@ fn code_coloring(code: &str, lang: &str) {
     }
 }
 
-fn parse_code_blocks(input: &str) -> Vec<(String, String)> {
+fn parse_code_blocks(input: &str) -> Vec<(&str, String)> {
     let mut result = Vec::new();
     let mut current_lang = "";
     let mut current_code = String::new();
@@ -39,12 +39,16 @@ fn parse_code_blocks(input: &str) -> Vec<(String, String)> {
     for line in input.lines() {
         if line.starts_with("```") {
             if in_code_block {
-                result.push((capitalize(current_lang), current_code));
+                result.push((current_lang, current_code));
                 current_lang = "";
                 current_code = "".to_string();
                 in_code_block = false;
             } else {
-                current_lang = &line[3..];
+                if !line[3..].is_empty() {
+                    current_lang = &line[3..];
+                } else {
+                    current_lang = "plain";
+                }
                 current_code = "".to_string();
                 in_code_block = true;
             }
@@ -52,19 +56,11 @@ fn parse_code_blocks(input: &str) -> Vec<(String, String)> {
             current_code += line;
             current_code += "\n";
         } else {
-            result.push(("".to_string(), line.to_string()));
+            result.push(("", line.to_owned()));
         }
     }
     if in_code_block {
-        result.push((capitalize(current_lang), current_code));
+        result.push((current_lang, current_code));
     }
     result
-}
-
-fn capitalize(s: &str) -> String {
-    let mut chars = s.chars();
-    match chars.next() {
-        None => String::new(),
-        Some(c) => c.to_uppercase().collect::<String>() + chars.as_str(),
-    }
 }
