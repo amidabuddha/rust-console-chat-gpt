@@ -5,9 +5,6 @@ use syntect::parsing::SyntaxSet;
 use syntect::util::{as_24_bit_terminal_escaped, LinesWithEndings};
 
 pub fn handle_code(content: String, content_color: String) {
-    // let re = Regex::new(r"```.*?\n").unwrap();
-    // let content_no_lang = re.replace_all(&content, "```");
-    // let fragments: Vec<&str> = content_no_lang.split("```").collect();
     let fragments = parse_code_blocks(&content);
     for fragment in fragments {
         if fragment.0 == "" {
@@ -18,13 +15,10 @@ pub fn handle_code(content: String, content_color: String) {
     }
 }
 
-// TODO: add code syntax highlighting
-
 fn code_coloring(code: &str, lang: &str) {
     let ps = SyntaxSet::load_defaults_newlines();
     let ts = ThemeSet::load_defaults();
 
-    // let syntax = ps.find_syntax_by_extension("rs").unwrap();
     let syntax = ps
         .find_syntax_by_name(lang)
         .unwrap_or_else(|| ps.find_syntax_plain_text());
