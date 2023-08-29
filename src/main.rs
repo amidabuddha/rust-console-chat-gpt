@@ -96,7 +96,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     assistant_message.content.to_string(),
                     chat_config.chat.colors.assistant_response.to_string(),
                 );
-                conversation.messages.push(assistant_message.clone());
+                conversation.messages.push(assistant_message.to_owned());
                 if chat_config.chat.debug {
                     // println!("{:#?}", conversation);
                     save_chat("messages.json".to_string(), &base_path, &conversation);
