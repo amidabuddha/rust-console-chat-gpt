@@ -37,7 +37,7 @@ fn parse_code_blocks(input: &str) -> Vec<(&str, String)> {
     let mut current_code = String::new();
     let mut in_code_block = false;
     for line in input.lines() {
-        if line.starts_with("```") {
+        if line.trim().starts_with("```") {
             if in_code_block {
                 result.push((current_lang, current_code));
                 current_lang = "";
