@@ -35,7 +35,7 @@ impl UserActions {
 pub enum Roles {
     SYSTEM,
     USER,
-    // ASSISTANT,
+    ASSISTANT,
 }
 
 impl Roles {
@@ -43,7 +43,7 @@ impl Roles {
         match self {
             Roles::SYSTEM => "system",
             Roles::USER => "user",
-            // Roles::ASSISTANT => "assistant",
+            Roles::ASSISTANT => "assistant",
         }
     }
 }

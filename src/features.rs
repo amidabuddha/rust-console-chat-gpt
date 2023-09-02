@@ -5,7 +5,7 @@ use std::io::Write;
 use std::path::PathBuf;
 
 use super::models::api::OpenAIRequest;
-use super::models::enums::UserActions;
+use super::models::enums::{Roles, UserActions};
 
 pub fn save_chat(name: String, path: &PathBuf, conversation: &OpenAIRequest) {
     // TODO: implement ask and skip_exit
@@ -43,7 +43,7 @@ pub fn help_info() {
 }
 
 pub fn edit_latest(mut conversation: OpenAIRequest) -> OpenAIRequest {
-    if conversation.messages.last().unwrap().role == "assistant" {
+    if conversation.messages.last().unwrap().role == Roles::ASSISTANT.as_str() {
         conversation.messages.pop();
     }
     println!("This was the last User message in the conversation. You may rewrite it or type a new one instead:\n");
