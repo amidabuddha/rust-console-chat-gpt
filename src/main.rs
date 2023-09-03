@@ -4,7 +4,7 @@ use std::fs;
 use toml;
 
 mod features;
-use features::{edit_latest, help_info, save_chat, select_temperature};
+use features::{edit_latest, help_info, save_chat};
 
 mod models {
     pub mod api;
@@ -18,7 +18,9 @@ mod styling;
 use styling::handle_code;
 
 mod utils;
-use utils::{get_openai_response, get_user_input, init_conversation_message, set_message};
+use utils::{
+    get_openai_response, get_user_input, init_conversation_message, select_temperature, set_message,
+};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -47,6 +49,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     // TODO: implement role_selector
+    if chat_config.chat.role_selector {
+        println!("This will be a role selector");
+    }
 
     let mut conversation = init_conversation_message(&chat_config);
 
