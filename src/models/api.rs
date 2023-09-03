@@ -10,6 +10,7 @@ pub struct OpenAIMessage {
 #[derive(Serialize, Deserialize, Debug, Default)]
 pub struct OpenAIRequest {
     pub model: String,
+    pub temperature: f64,
     pub messages: Vec<OpenAIMessage>,
 }
 

@@ -21,6 +21,7 @@ pub fn init_conversation_message(chat_config: &ChatConfig) -> OpenAIRequest {
 
     let conversation: OpenAIRequest = OpenAIRequest {
         model: chat_config.chat.model.model_name.to_string(),
+        temperature: chat_config.chat.temperature,
         messages: vec![set_message(Roles::SYSTEM, system_role)],
     };
 

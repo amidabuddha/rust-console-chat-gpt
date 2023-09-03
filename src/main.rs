@@ -4,7 +4,7 @@ use std::fs;
 use toml;
 
 mod features;
-use features::{edit_latest, help_info, save_chat};
+use features::{edit_latest, help_info, save_chat, select_temperature};
 
 mod models {
     pub mod api;
@@ -29,18 +29,28 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         fs::create_dir_all(&chat_path)?;
     }
     let toml_str = fs::read_to_string(config_path)?;
-    let chat_config: ChatConfig = toml::from_str(&toml_str)?;
+    let mut chat_config: ChatConfig = toml::from_str(&toml_str)?;
     let url = format!(
         "{}{}",
         &chat_config.chat.api.base_url, &chat_config.chat.api.endpoint
     );
     let api_key = &chat_config.chat.api.api_key;
 
-    // TODO: implement temperature_selector
-    // TODO: mplement role_selector
+    // Set chat colors
+    let user_prompt_color = &chat_config.chat.colors.user_prompt;
+    let assistant_prompt_color = &chat_config.chat.colors.assistant_prompt;
+    let assistant_response_color = &chat_config.chat.colors.assistant_response;
+
+    // Set chat temperature
+    if chat_config.chat.adjust_temperature {
+        chat_config.chat.temperature = select_temperature(chat_config.chat.temperature);
+    };
+
+    // TODO: implement role_selector
+
     let mut conversation = init_conversation_message(&chat_config);
 
-    while let Some(user_input) = get_user_input(&chat_config.chat.colors.user_prompt) {
+    while let Some(user_input) = get_user_input(&user_prompt_color) {
         match user_input {
             /*
             implement cost
@@ -90,11 +100,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 let assistant_message = &choices[0].message;
                 print!(
                     "{} ",
-                    "Assistant:".color(chat_config.chat.colors.assistant_prompt.to_string())
+                    "Assistant:".color(assistant_prompt_color.to_string())
                 );
                 handle_code(
                     assistant_message.content.to_string(),
-                    chat_config.chat.colors.assistant_response.to_string(),
+                    assistant_response_color.to_string(),
                 );
                 conversation.messages.push(assistant_message.to_owned());
                 if chat_config.chat.debug {
