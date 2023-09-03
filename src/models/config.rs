@@ -1,6 +1,6 @@
 #![allow(unused)]
 use serde::Deserialize;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 #[derive(Debug, Deserialize)]
 pub struct ChatConfig {
@@ -19,7 +19,7 @@ pub struct Chat {
     pub api: ChatApi,
     pub colors: ChatColors,
     pub model: ChatModel,
-    pub roles: HashMap<String, String>,
+    pub roles: BTreeMap<String, String>,
 }
 
 #[derive(Debug, Deserialize, Default)]

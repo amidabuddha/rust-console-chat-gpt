@@ -19,13 +19,14 @@ use styling::handle_code;
 
 mod utils;
 use utils::{
-    get_openai_response, get_user_input, init_conversation_message, select_temperature, set_message,
+    get_openai_response, get_user_input, init_conversation_message, role_selector,
+    select_temperature, set_message,
 };
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let base_path = env::current_dir()?;
-    let config_path = base_path.join("config.toml");
+    let config_path = &base_path.join("config.toml");
     let chat_path = base_path.join("chats");
     if !chat_path.exists() {
         fs::create_dir_all(&chat_path)?;
@@ -48,9 +49,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         chat_config.chat.temperature = select_temperature(chat_config.chat.temperature);
     };
 
-    // TODO: implement role_selector
+    // Set custom role
     if chat_config.chat.role_selector {
-        println!("This will be a role selector");
+        (chat_config.chat.default_system_role, chat_config.chat.roles) = role_selector(
+            config_path,
+            chat_config.chat.default_system_role,
+            chat_config.chat.roles,
+        );
     }
 
     let mut conversation = init_conversation_message(&chat_config);
