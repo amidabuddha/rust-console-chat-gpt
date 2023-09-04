@@ -4,8 +4,12 @@ use toml;
 
 mod features;
 use features::{
-    calculate_costs::calculate_costs, edit_latest::edit_latest, format_request::format_request,
-    help_info::help_info, load_from_file::load_from_file, save_chat::save_chat,
+    calculate_costs::calculate_costs,
+    edit_latest::edit_latest,
+    format_request::format_request,
+    help_info::help_info,
+    load_from_file::load_from_file,
+    save_chat::{save_chat, save_chat_with_prompt},
 };
 
 mod helpers;
@@ -81,22 +85,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 if conversation.messages.len() < 2 {
                     println!("Seems like your chat has not started yet...");
                 } else {
-                    save_chat("".to_string(), chat_path, &conversation);
+                    save_chat_with_prompt(chat_path, &conversation);
                     conversation = edit_latest(conversation);
                 }
                 continue;
             }
             UserActions::EXIT => {
-                println!("Goodbye!");
                 if chat_config.chat.save_chat_on_exit {
-                    save_chat("".to_string(), chat_path, &conversation);
+                    save_chat(None, chat_path, &conversation, true);
                 }
+                println!("Goodbye!");
                 break;
             }
             UserActions::FLUSH => {
-                if chat_config.chat.save_chat_on_exit {
-                    save_chat("".to_string(), chat_path, &conversation);
-                }
+                save_chat_with_prompt(chat_path, &conversation);
                 conversation = init_conversation_message(&chat_config);
                 continue;
             }
@@ -115,7 +117,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 continue;
             }
             UserActions::SAVE => {
-                save_chat("".to_string(), chat_path, &conversation);
+                save_chat(None, chat_path, &conversation, true);
             }
             UserActions::INPUT(input) => {
                 conversation.messages.push(set_message(Roles::USER, input));
@@ -134,7 +136,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 );
                 conversation.messages.push(assistant_message.to_owned());
                 if chat_config.chat.debug {
-                    save_chat("messages.json".to_string(), &base_path, &conversation);
+                    save_chat(
+                        Some("messages".to_string()),
+                        &base_path,
+                        &conversation,
+                        false,
+                    );
                 }
             }
         }

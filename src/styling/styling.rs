@@ -56,7 +56,7 @@ fn parse_code_blocks(input: &str) -> Vec<(&str, String)> {
             current_code += line;
             current_code += "\n";
         } else {
-            result.push(("", line.to_owned()));
+            result.push(("", line.to_string()));
         }
     }
     if in_code_block {

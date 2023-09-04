@@ -1,8 +1,4 @@
-use std::{
-    collections::BTreeMap,
-    io::{self, Write},
-    path::PathBuf,
-};
+use std::{collections::BTreeMap, path::PathBuf};
 
 use dialoguer::{theme::ColorfulTheme, Select};
 use toml::Value;
@@ -37,10 +33,10 @@ pub fn role_selector(
             (default_role, role_list) = custom_role(role_list);
             let mut lines = 0;
             loop {
-                print!("Would you like to save the custom role? y/n: ");
                 lines += 1;
-                io::stdout().flush().unwrap();
-                let user_input = read_user_input_no_whitespace();
+                let user_input = read_user_input_no_whitespace(
+                    "Would you like to save the custom role? y/n: ".to_string(),
+                );
                 if user_input.is_empty() || user_input == "n".to_string() {
                     flush_lines(lines);
                     break;
@@ -86,10 +82,9 @@ fn get_selected_role(default_role: &str, role_names: &[String]) -> usize {
 fn custom_role(mut role_list: BTreeMap<String, String>) -> (String, BTreeMap<String, String>) {
     let mut lines = 0;
     loop {
-        print!("Enter a title for the new role: ");
         lines += 1;
-        io::stdout().flush().unwrap();
-        let user_input = read_user_input_no_whitespace();
+        let user_input =
+            read_user_input_no_whitespace("Enter a title for the new role: ".to_string());
         if user_input.is_empty() {
             println!("Please fill the title!");
             lines += 1;
@@ -102,10 +97,10 @@ fn custom_role(mut role_list: BTreeMap<String, String>) -> (String, BTreeMap<Str
         }
         let custom_role = user_input;
         loop {
-            print!("Enter a detailed description of your assistant role: ");
             lines += 1;
-            io::stdout().flush().unwrap();
-            let user_input = read_user_input();
+            let user_input = read_user_input(
+                "Enter a detailed description of your assistant role: ".to_string(),
+            );
             if user_input.is_empty() {
                 println!("Please fill the description!");
                 lines += 1;
@@ -142,12 +137,11 @@ fn update_roles_for_config(
         chat.insert("roles".to_string(), toml::Value::Table(role_list_toml));
     }
     loop {
-        print!(
-            "Would you like to have this custom role as the default role in future chats? y/n: "
-        );
         lines += 1;
-        io::stdout().flush().unwrap();
-        let user_input = read_user_input_no_whitespace();
+        let user_input = read_user_input_no_whitespace(
+            "Would you like to have this custom role as the default role in future chats? y/n: "
+                .to_string(),
+        );
         if user_input.is_empty() || user_input == "n".to_string() {
             break;
         }
