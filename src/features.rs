@@ -26,13 +26,13 @@ pub fn help_info() {
     Prints the available commands
     */
     println!("You can use the following commands:");
-    let commands: [UserActions; 6] = [
-        // UserActions::COST,
+    let commands: [UserActions; 9] = [
+        UserActions::COST,
         UserActions::EDIT,
         UserActions::EXIT,
-        // UserActions::FILE,
+        UserActions::FILE,
         UserActions::FLUSH,
-        // UserActions::FORMAT,
+        UserActions::FORMAT,
         UserActions::SAVE,
         UserActions::HELP,
         UserActions::COMMANDS,
@@ -51,4 +51,19 @@ pub fn edit_latest(mut conversation: OpenAIRequest) -> OpenAIRequest {
     conversation.messages.pop();
 
     conversation
+}
+
+pub fn load_from_file() {
+    // TODO:
+    println!("This winction will load the prompt from a file.");
+}
+
+pub fn format_request() {
+    // TODO:
+    println!("This function will accept multi-line request.");
+}
+
+pub fn calculate_costs() {
+    // TODO:
+    println!("This function will return conversation costs.");
 }

@@ -4,7 +4,9 @@ use std::fs;
 use toml;
 
 mod features;
-use features::{edit_latest, help_info, save_chat};
+use features::{
+    calculate_costs, edit_latest, format_request, help_info, load_from_file, save_chat,
+};
 
 mod models {
     pub mod api;
@@ -62,13 +64,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     while let Some(user_input) = get_user_input(&user_prompt_color) {
         match user_input {
-            /*
-            implement cost
-            implement file
-            implement format
-            */
             UserActions::NONE => {
                 println!("Please enter your message!");
+                continue;
+            }
+            UserActions::COST => {
+                // TODO:
+                calculate_costs();
                 continue;
             }
             UserActions::EDIT => {
@@ -92,6 +94,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     save_chat("".to_string(), &chat_path, &conversation);
                 };
                 conversation = init_conversation_message(&chat_config);
+                continue;
+            }
+            UserActions::FORMAT => {
+                // TODO:
+                format_request();
+                continue;
+            }
+            UserActions::FILE => {
+                // TODO:
+                load_from_file();
                 continue;
             }
             UserActions::HELP | UserActions::COMMANDS => {

@@ -1,11 +1,11 @@
 pub enum UserActions {
     NONE,
-    // COST,
+    COST,
     EDIT,
     EXIT,
-    // FILE,
+    FILE,
     FLUSH,
-    // FORMAT,
+    FORMAT,
     SAVE,
     HELP,
     COMMANDS,
@@ -16,14 +16,16 @@ impl UserActions {
     pub fn description(&self) -> &'static str {
         match self {
             UserActions::NONE => "",
-            // UserActions::COST => "\tcost - Display conversation costs.",
+            UserActions::COST => "\tcost - Display conversation costs.",
             UserActions::EDIT => {
                 "\tedit - Edit the latest User message. Last Assistant reply will be lost."
             }
             UserActions::EXIT => "\texit - Exit the program.",
-            // UserActions::FILE => "\tfile - Submit long text from a file to the chat.",
+            UserActions::FILE => "\tfile - Submit long text from a file to the chat.",
             UserActions::FLUSH => "\tflush - Start a new conversation.",
-            // UserActions::FORMAT => "\tformat - Format multiline pasted text before sending to the chat.",
+            UserActions::FORMAT => {
+                "\tformat - Format multiline pasted text before sending to the chat."
+            }
             UserActions::SAVE => "\tsave - Save the current conversation to a file.",
             UserActions::HELP => "\n\thelp - Display this help message.",
             UserActions::COMMANDS => "\tcommands - Display this list of commands.",

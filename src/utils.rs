@@ -46,9 +46,12 @@ pub fn get_user_input(user_prompt_color: &String) -> Option<UserActions> {
             let input = user_input.trim().to_lowercase();
             match input.as_str() {
                 "" => Some(UserActions::NONE),
+                "cost" => Some(UserActions::COST),
                 "edit" => Some(UserActions::EDIT),
                 "exit" | "quit" | "bye" => Some(UserActions::EXIT),
+                "file" => Some(UserActions::FILE),
                 "flush" => Some(UserActions::FLUSH),
+                "format" => Some(UserActions::FORMAT),
                 "help" | "commands" => Some(UserActions::HELP),
                 "save" => Some(UserActions::SAVE),
                 _ => Some(UserActions::INPUT(input.to_string())),
