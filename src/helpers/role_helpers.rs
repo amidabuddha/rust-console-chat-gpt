@@ -5,8 +5,9 @@ use std::{
 };
 
 use dialoguer::{theme::ColorfulTheme, Select};
+use toml::Value;
 
-use crate::helpers::utils::sysutils::{flush_lines, update_toml_file};
+use crate::helpers::utils::sysutils::{flush_lines, open_parse_toml, serialize_write_toml};
 use crate::helpers::utils::user_input::{read_user_input, read_user_input_no_whitespace};
 use crate::models::config::ChatConfig;
 
@@ -44,7 +45,7 @@ pub fn role_selector(
                     break;
                 }
                 if user_input == "y".to_string() {
-                    update_toml_file(path, default_role.clone(), &role_list);
+                    update_toml_file_roles(path, default_role.clone(), &role_list);
                     flush_lines(lines);
                     break;
                 }
@@ -114,4 +115,47 @@ fn custom_role(mut role_list: BTreeMap<String, String>) -> (String, BTreeMap<Str
             return (custom_role, role_list);
         }
     }
+}
+
+fn update_toml_file_roles(
+    path: &PathBuf,
+    default_role: String,
+    role_list: &BTreeMap<String, String>,
+) {
+    let mut toml = open_parse_toml(path);
+    update_roles_for_config(default_role, role_list, &mut toml);
+    serialize_write_toml(path, &toml);
+}
+
+fn update_roles_for_config(
+    default_role: String,
+    role_list: &BTreeMap<String, String>,
+    toml: &mut Value,
+) {
+    let mut lines = 0;
+    let mut role_list_toml = toml::value::Table::new();
+    for (k, v) in role_list {
+        role_list_toml.insert(k.to_string(), toml::Value::String(v.to_string()));
+    }
+    if let Some(chat) = toml.get_mut("chat").and_then(|v| v.as_table_mut()) {
+        chat.insert("roles".to_string(), toml::Value::Table(role_list_toml));
+    }
+    loop {
+        print!(
+            "Would you like to have this custom role as the default role in future chats? y/n: "
+        );
+        lines += 1;
+        io::stdout().flush().unwrap();
+        let user_input = read_user_input_no_whitespace();
+        if user_input.is_empty() || user_input == "n".to_string() {
+            break;
+        }
+        if user_input == "y".to_string() {
+            toml["chat"]["default_system_role"] = toml::Value::String(default_role.into());
+            break;
+        }
+        println!("Please confirm your choice with \"y\" or \"n\"");
+        lines += 1;
+    }
+    flush_lines(lines);
 }
