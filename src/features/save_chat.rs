@@ -9,7 +9,14 @@ use crate::helpers::utils::user_input::read_user_input_no_whitespace;
 use crate::models::api::OpenAIRequest;
 
 // pub fn check_saved() {
-//     // TODO: check folder chats fro previous chats and ask
+//     // TODO: check folder chats for previous chats and ask
+//     // 1. check if chat folder exist
+//     // 2. check if there are files in chat folder
+//     // 3. get file names in a list
+//     // 4. use dialoguer to crate a selection of file names
+//     // 4.1 adding "Skip" as top selection that continue to the next code block without any action
+//     // 4.2 appending "Exit" as last selection that implements this match: "Exit" => std::process::exit(0),
+//     // 5. read as JSON content the selected file into an object of type OpenAIRequest
 // }
 
 pub fn save_chat(

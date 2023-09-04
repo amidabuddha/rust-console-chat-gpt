@@ -1,4 +1,5 @@
 use colored::*;
+use spinners::{Spinner, Spinners};
 use std::env;
 use toml;
 
@@ -17,7 +18,8 @@ use helpers::api_helpers::{get_openai_response, init_conversation_message, set_m
 use helpers::role_helpers::role_selector;
 use helpers::temperature_helpers::select_temperature;
 use helpers::utils::{
-    check_dir::confirm_or_create, toml_helpers::open_toml, user_input::get_user_input,
+    check_dir::confirm_or_create, flush_lines::flush_lines, toml_helpers::open_toml,
+    user_input::get_user_input,
 };
 
 mod models;
@@ -122,7 +124,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             UserActions::INPUT(input) => {
                 conversation.messages.push(set_message(Roles::USER, input));
 
+                // Spinner start
+                let mut sp = Spinner::new(Spinners::Dots9, "Generating Output...".into());
+
                 let response = get_openai_response(&url, &api_key, &conversation).await?;
+
+                // Spinner stop
+                sp.stop_with_newline();
+                flush_lines(1);
 
                 let choices = response.choices;
                 let assistant_message = &choices[0].message;
