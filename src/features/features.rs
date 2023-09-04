@@ -4,8 +4,8 @@ use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
 
-use super::models::api::OpenAIRequest;
-use super::models::enums::{Roles, UserActions};
+use crate::models::api::OpenAIRequest;
+use crate::models::enums::{Roles, UserActions};
 
 pub fn save_chat(name: String, path: &PathBuf, conversation: &OpenAIRequest) {
     // TODO: implement ask and skip_exit

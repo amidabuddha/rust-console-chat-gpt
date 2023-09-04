@@ -4,7 +4,7 @@ use std::fs;
 use toml;
 
 mod features;
-use features::{
+use features::features::{
     calculate_costs, edit_latest, format_request, help_info, load_from_file, save_chat,
 };
 
@@ -17,13 +17,13 @@ use models::config::ChatConfig;
 use models::enums::{Roles, UserActions};
 
 mod styling;
-use styling::handle_code;
+use styling::styling::handle_code;
 
-mod utils;
-use utils::{
-    get_openai_response, get_user_input, init_conversation_message, role_selector,
-    select_temperature, set_message,
-};
+mod helpers;
+use helpers::api_helpers::{get_openai_response, init_conversation_message, set_message};
+use helpers::role_helpers::role_selector;
+use helpers::temperature_helpers::select_temperature;
+use helpers::utils::user_input::get_user_input;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
