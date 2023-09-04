@@ -7,7 +7,8 @@ use std::{
 use dialoguer::{theme::ColorfulTheme, Select};
 use toml::Value;
 
-use crate::helpers::utils::sysutils::{flush_lines, open_parse_toml, serialize_write_toml};
+use crate::helpers::utils::flush_lines::flush_lines;
+use crate::helpers::utils::toml_helpers::{open_parse_toml, serialize_write_toml};
 use crate::helpers::utils::user_input::{read_user_input, read_user_input_no_whitespace};
 use crate::models::config::ChatConfig;
 

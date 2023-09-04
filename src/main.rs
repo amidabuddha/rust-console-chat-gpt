@@ -1,18 +1,20 @@
 use colored::*;
 use std::env;
-use std::fs;
 use toml;
 
 mod features;
-use features::features::{
-    calculate_costs, edit_latest, format_request, help_info, load_from_file, save_chat,
+use features::{
+    calculate_costs::calculate_costs, edit_latest::edit_latest, format_request::format_request,
+    help_info::help_info, load_from_file::load_from_file, save_chat::save_chat,
 };
 
 mod helpers;
 use helpers::api_helpers::{get_openai_response, init_conversation_message, set_message};
 use helpers::role_helpers::role_selector;
 use helpers::temperature_helpers::select_temperature;
-use helpers::utils::user_input::get_user_input;
+use helpers::utils::{
+    check_dir::confirm_or_create, toml_helpers::open_toml, user_input::get_user_input,
+};
 
 mod models;
 use models::config::ChatConfig;
@@ -25,15 +27,13 @@ use styling::styling::handle_code;
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let base_path = env::current_dir()?;
     let config_path = &base_path.join("config.toml");
-    let chat_path = base_path.join("chats");
+    let chat_path = &base_path.join("chats");
 
     // Create chats directory if it doesn't exist
-    if !chat_path.exists() {
-        fs::create_dir_all(&chat_path)?;
-    }
+    confirm_or_create(chat_path);
 
     // Read ChatConfig from config.toml
-    let toml_str = fs::read_to_string(config_path)?;
+    let toml_str = open_toml(config_path);
     let mut chat_config: ChatConfig = toml::from_str(&toml_str)?;
 
     // Set API URL and API Key
@@ -81,7 +81,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 if conversation.messages.len() < 2 {
                     println!("Seems like your chat has not started yet...");
                 } else {
-                    save_chat("".to_string(), &chat_path, &conversation);
+                    save_chat("".to_string(), chat_path, &conversation);
                     conversation = edit_latest(conversation);
                 }
                 continue;
@@ -89,13 +89,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             UserActions::EXIT => {
                 println!("Goodbye!");
                 if chat_config.chat.save_chat_on_exit {
-                    save_chat("".to_string(), &chat_path, &conversation);
+                    save_chat("".to_string(), chat_path, &conversation);
                 }
                 break;
             }
             UserActions::FLUSH => {
                 if chat_config.chat.save_chat_on_exit {
-                    save_chat("".to_string(), &chat_path, &conversation);
+                    save_chat("".to_string(), chat_path, &conversation);
                 }
                 conversation = init_conversation_message(&chat_config);
                 continue;
@@ -115,7 +115,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 continue;
             }
             UserActions::SAVE => {
-                save_chat("".to_string(), &chat_path, &conversation);
+                save_chat("".to_string(), chat_path, &conversation);
             }
             UserActions::INPUT(input) => {
                 conversation.messages.push(set_message(Roles::USER, input));

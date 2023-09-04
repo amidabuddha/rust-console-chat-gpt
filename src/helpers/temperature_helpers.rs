@@ -1,4 +1,4 @@
-use crate::helpers::utils::sysutils::flush_lines;
+use crate::helpers::utils::flush_lines::flush_lines;
 use std::io::{self, Write};
 
 pub fn select_temperature(mut chat_temperature: f64) -> f64 {
