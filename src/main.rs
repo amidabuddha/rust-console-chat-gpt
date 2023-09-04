@@ -26,11 +26,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let base_path = env::current_dir()?;
     let config_path = &base_path.join("config.toml");
     let chat_path = base_path.join("chats");
+
+    // Create chats directory if it doesn't exist
     if !chat_path.exists() {
         fs::create_dir_all(&chat_path)?;
     }
+
+    // Read ChatConfig from config.toml
     let toml_str = fs::read_to_string(config_path)?;
     let mut chat_config: ChatConfig = toml::from_str(&toml_str)?;
+
+    // Set API URL and API Key
     let url = format!(
         "{}{}",
         &chat_config.chat.api.base_url, &chat_config.chat.api.endpoint
@@ -45,15 +51,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Set chat temperature
     if chat_config.chat.adjust_temperature {
         chat_config.chat.temperature = select_temperature(chat_config.chat.temperature);
-    };
+    }
 
     // Set custom role
     if chat_config.chat.role_selector {
-        (chat_config.chat.default_system_role, chat_config.chat.roles) = role_selector(
+        let (default_role, roles) = role_selector(
             config_path,
             chat_config.chat.default_system_role,
             chat_config.chat.roles,
         );
+        chat_config.chat.default_system_role = default_role;
+        chat_config.chat.roles = roles;
     }
 
     let mut conversation = init_conversation_message(&chat_config);
@@ -65,7 +73,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 continue;
             }
             UserActions::COST => {
-                // TODO:
+                // TODO: implement
                 calculate_costs();
                 continue;
             }
@@ -82,23 +90,23 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 println!("Goodbye!");
                 if chat_config.chat.save_chat_on_exit {
                     save_chat("".to_string(), &chat_path, &conversation);
-                };
+                }
                 break;
             }
             UserActions::FLUSH => {
                 if chat_config.chat.save_chat_on_exit {
                     save_chat("".to_string(), &chat_path, &conversation);
-                };
+                }
                 conversation = init_conversation_message(&chat_config);
                 continue;
             }
             UserActions::FORMAT => {
-                // TODO:
+                // TODO: implement
                 format_request();
                 continue;
             }
             UserActions::FILE => {
-                // TODO:
+                // TODO: implement
                 load_from_file();
                 continue;
             }
@@ -126,7 +134,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 );
                 conversation.messages.push(assistant_message.to_owned());
                 if chat_config.chat.debug {
-                    // println!("{:#?}", conversation);
                     save_chat("messages.json".to_string(), &base_path, &conversation);
                 }
             }
