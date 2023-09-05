@@ -14,16 +14,15 @@ use features::{
 };
 
 mod helpers;
-use helpers::model_helper::select_model;
-use helpers::role_helpers::role_selector;
-use helpers::temperature_helpers::select_temperature;
-use helpers::utils::{
-    fs_helpers::confirm_or_create,
-    user_input::{flush_lines, get_user_input},
-};
 use helpers::{
     api_helpers::{get_openai_response, init_conversation_message, set_message},
-    utils::fs_helpers::open_parse_toml,
+    model_helper::select_model,
+    role_helpers::role_selector,
+    temperature_helpers::select_temperature,
+    utils::{
+        fs_helpers::{confirm_or_create, open_parse_toml_to_config},
+        user_input::{flush_lines, get_user_input},
+    },
 };
 
 mod models;
@@ -44,7 +43,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     confirm_or_create(chat_path);
 
     // Read ChatConfig from config.toml
-    let mut chat_config: ChatConfig = open_parse_toml(config_path).unwrap();
+    let mut chat_config: ChatConfig = open_parse_toml_to_config(config_path);
 
     // Select model
     let model = if chat_config.chat.model_selector {

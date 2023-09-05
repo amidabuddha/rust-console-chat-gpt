@@ -43,7 +43,7 @@ pub fn check_saved(path: &PathBuf) -> Result<OpenAIRequest, ()> {
             "Exit" => std::process::exit(0),
             "Skip" => return Err(()),
             file_name => {
-                chat = open_parse_json(&path.join(file_name)).unwrap();
+                chat = open_parse_json(&path.join(file_name));
             }
         }
         Ok(chat)
