@@ -4,7 +4,7 @@ use serde_json;
 use std::{
     fs::{self, File},
     io::Write,
-    path::PathBuf,
+    path::{Path, PathBuf},
 };
 
 use crate::helpers::utils::flush_lines::flush_lines;
@@ -61,7 +61,7 @@ pub fn check_saved(path: &PathBuf) -> Result<OpenAIRequest, ()> {
 
 pub fn save_chat(
     mut custom_file_name: Option<String>,
-    path: &PathBuf,
+    path: &Path,
     conversation: &OpenAIRequest,
     ask: bool,
 ) {

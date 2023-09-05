@@ -33,7 +33,8 @@ use styling::styling::handle_code;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let base_path = env::current_dir()?;
+    let curent_exe = env::current_exe()?;
+    let base_path = curent_exe.parent().unwrap();
     let config_path = &base_path.join("config.toml");
     let chat_path = &base_path.join("chats");
 
