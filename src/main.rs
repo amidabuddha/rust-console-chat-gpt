@@ -1,3 +1,4 @@
+use clearscreen::ClearScreen;
 use colored::*;
 use spinners::{Spinner, Spinners};
 use std::env;
@@ -69,7 +70,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         chat_config.chat.default_system_role = default_role;
         chat_config.chat.roles = roles;
     }
-
+    // Implement resume chat here?
     let mut conversation = init_conversation_message(&chat_config);
 
     while let Some(user_input) = get_user_input(&user_prompt_color) {
@@ -88,7 +89,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     println!("Seems like your chat has not started yet...");
                 } else {
                     save_chat_with_prompt(chat_path, &conversation);
-                    conversation = edit_latest(conversation);
+                    conversation = edit_latest(conversation, &user_prompt_color);
                 }
                 continue;
             }
@@ -101,6 +102,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
             UserActions::FLUSH => {
                 save_chat_with_prompt(chat_path, &conversation);
+                ClearScreen::default()
+                    .clear()
+                    .expect("failed to clear the screen");
                 conversation = init_conversation_message(&chat_config);
                 continue;
             }
