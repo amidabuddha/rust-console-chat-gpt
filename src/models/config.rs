@@ -13,21 +13,21 @@ pub struct Chat {
     pub adjust_temperature: bool,
     pub default_system_role: String,
     pub role_selector: bool,
+    pub model_selector: bool,
+    pub default_model: String,
     pub save_chat_on_exit: bool,
     pub debug: bool,
     pub last_completion_max_tokens: u64,
     pub api: ChatApi,
     pub colors: ChatColors,
-    pub model: ChatModel,
+    pub models: BTreeMap<String, ChatModel>,
     pub roles: BTreeMap<String, String>,
 }
 
 #[derive(Debug, Deserialize, Default)]
 pub struct ChatApi {
-    pub api_key: String,
     pub base_url: String,
     pub endpoint: String,
-    pub api_usage: f64,
 }
 
 #[derive(Debug, Deserialize, Default)]
@@ -43,4 +43,6 @@ pub struct ChatModel {
     model_input_pricing_per_1k: f64,
     model_output_pricing_per_1k: f64,
     model_max_tokens: u64,
+    pub api_key: String,
+    api_usage: f64,
 }

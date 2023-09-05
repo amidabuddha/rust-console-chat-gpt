@@ -10,11 +10,11 @@ use crate::models::enums::Roles;
 
 use super::role_helpers::set_system_role;
 
-pub fn init_conversation_message(chat_config: &ChatConfig) -> OpenAIRequest {
+pub fn init_conversation_message(chat_config: &ChatConfig, model: &String) -> OpenAIRequest {
     let system_role = set_system_role(chat_config);
 
     OpenAIRequest {
-        model: chat_config.chat.model.model_name.to_string(),
+        model: chat_config.chat.models[model].model_name.to_string(),
         temperature: chat_config.chat.temperature,
         messages: vec![set_message(Roles::SYSTEM, system_role)],
     }

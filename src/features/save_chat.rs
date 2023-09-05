@@ -8,15 +8,48 @@ use crate::helpers::utils::flush_lines::flush_lines;
 use crate::helpers::utils::user_input::read_user_input_no_whitespace;
 use crate::models::api::OpenAIRequest;
 
-// pub fn check_saved() {
-//     // TODO: check folder chats for previous chats and ask
-//     // 1. check if chat folder exist
-//     // 2. check if there are files in chat folder
-//     // 3. get file names in a list
-//     // 4. use dialoguer to crate a selection of file names
-//     // 4.1 adding "Skip" as top selection that continue to the next code block without any action
-//     // 4.2 appending "Exit" as last selection that implements this match: "Exit" => std::process::exit(0),
-//     // 5. read as JSON content the selected file into an object of type OpenAIRequest
+// pub fn check_saved(path: &PathBuf) -> OpenAIRequest {
+
+//     // Check if there are files in chat folder
+//     let entries: Vec<_> = fs::read_dir(path)?.collect();
+//     if entries.is_empty() {
+//         return Ok(());
+//     }
+
+//     // Get file names in a list
+//     let mut file_names = entries.into_iter().filter_map(|entry| {
+//         match entry {
+//             Ok(entry) => entry.file_name().into_string().ok(),
+//             Err(_) => None,
+//         }
+//     }).collect::<Vec<_>>();
+
+//     // Use dialoguer to create a selection of file names
+//     file_names.insert(0, "Skip".to_string());
+//     file_names.push("Exit".to_string());
+
+//     let selection = Select::new()
+//         .items(&file_names)
+//         .default(0)
+//         .interact()?;
+
+//     match file_names[selection].as_str() {
+//         "Exit" => std::process::exit(0),
+//         "Skip" => return Ok(()),
+//         file_name => {
+//             let mut file = fs::File::open(format!("{}{}", path, file_name))?;
+//             let mut contents = String::new();
+//             file.read_to_string(&mut contents)?;
+
+//             // Read as JSON content the selected file into an object of type OpenAIRequest
+//             // (Assuming OpenAIRequest is serde-serializable)
+//             let _open_ai_req: OpenAIRequest = serde_json::from_str(&contents)?;
+
+//             // Add actions to be done with open_ai_req object here...
+//         }
+//     }
+
+//     Ok(())
 // }
 
 pub fn save_chat(

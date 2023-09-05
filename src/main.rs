@@ -16,6 +16,7 @@ use features::{
 
 mod helpers;
 use helpers::api_helpers::{get_openai_response, init_conversation_message, set_message};
+use helpers::model_helper::select_model;
 use helpers::role_helpers::role_selector;
 use helpers::temperature_helpers::select_temperature;
 use helpers::utils::{
@@ -43,12 +44,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let toml_str = open_toml(config_path);
     let mut chat_config: ChatConfig = toml::from_str(&toml_str)?;
 
+    // Select model
+    let model = if chat_config.chat.model_selector {
+        select_model(&chat_config)
+    } else {
+        chat_config.chat.default_model.to_owned()
+    };
     // Set API URL and API Key
     let url = format!(
         "{}{}",
         &chat_config.chat.api.base_url, &chat_config.chat.api.endpoint
     );
-    let api_key = &chat_config.chat.api.api_key;
+    let api_key = &chat_config.chat.models[&model].api_key;
 
     // Set chat colors
     let user_prompt_color = &chat_config.chat.colors.user_prompt;
@@ -71,7 +78,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         chat_config.chat.roles = roles;
     }
     // Implement resume chat here?
-    let mut conversation = init_conversation_message(&chat_config);
+    let mut conversation = init_conversation_message(&chat_config, &model);
 
     while let Some(user_input) = get_user_input(&user_prompt_color) {
         match user_input {
@@ -105,7 +112,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 ClearScreen::default()
                     .clear()
                     .expect("failed to clear the screen");
-                conversation = init_conversation_message(&chat_config);
+                conversation = init_conversation_message(&chat_config, &model);
                 continue;
             }
             UserActions::FORMAT => {

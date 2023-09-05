@@ -1,22 +1,21 @@
 # Make sure to rename this file to config.toml
 # Otherwise, it won't be recognised
-# Also, don't forget to place your API Token
+# Also, don't forget to place your Open API key
 
 [chat]
 temperature = 1
 adjust_temperature = true
 default_system_role = "dev"
 role_selector = true
+model_selector = true
+default_model = "gpt3"
 save_chat_on_exit = true
 debug = false
 last_completion_max_tokens = 400
 
 [chat.api]
-api_key = "YOUR_OPENAI_API_KEY"
 base_url = "https://api.openai.com"
 endpoint = "/v1/chat/completions"
-# API usage is updated automatically!
-api_usage = 0
 
 [chat.colors]
 # Available colors:
@@ -26,16 +25,23 @@ user_prompt = "blue"
 assistant_prompt = "yellow"
 assistant_response = "cyan"
 
-[chat.model]
+[chat.models.gpt3]
 model_name = "gpt-3.5-turbo"
 model_input_pricing_per_1k = 0.0015
 model_output_pricing_per_1k = 0.002
 model_max_tokens = 4096
+api_key = "YOUR_OPENAI_GPT3_API_KEY"
+# API usage is updated automatically!
+api_usage = 0
 
-# model_name = "gpt-4"
-# model_input_pricing_per_1k = 0.03
-# model_output_pricing_per_1k = 0.06
-# model_max_tokens = 8192
+[chat.models.gpt4]
+model_name = "gpt-4"
+model_input_pricing_per_1k = 0.03
+model_output_pricing_per_1k = 0.06
+model_max_tokens = 8192
+api_key = "YOUR_OPENAI_GPT4_API_KEY"
+# API usage is updated automatically!
+api_usage = 0
 
 [chat.roles]
 ai_expert = "As an AI professional with a distinguished PhD in prompt engineering, you possess an extensive understanding of Artificial Intelligence, focusing on principles, techniques, and applications. Leverage your deep knowledge of Machine Learning and Neural Networks to provide specialized insights and solutions to complex problems. Ensure that your responses are delivered in a clear, coherent, and understandable manner, catering to both technical and non-technical audiences alike."
