@@ -1,56 +1,63 @@
 use chrono::prelude::*;
+use dialoguer::{theme::ColorfulTheme, Select};
 use serde_json;
-use std::fs::File;
-use std::io::Write;
-use std::path::PathBuf;
+use std::{
+    fs::{self, File},
+    io::Write,
+    path::PathBuf,
+};
 
 use crate::helpers::utils::flush_lines::flush_lines;
 use crate::helpers::utils::user_input::read_user_input_no_whitespace;
 use crate::models::api::OpenAIRequest;
 
-// pub fn check_saved(path: &PathBuf) -> OpenAIRequest {
+pub fn check_saved(path: &PathBuf) -> Result<OpenAIRequest, ()> {
+    // Check if there are files in chat folder
+    let entries: Vec<_> = fs::read_dir(path)
+        .expect("Failed to read the Diretory")
+        .collect();
+    let chat: OpenAIRequest;
+    if entries.is_empty() {
+        return Err(());
+    } else {
+        // Get file names in a list
+        let mut file_names = entries
+            .into_iter()
+            .filter_map(|entry| match entry {
+                Ok(entry) => entry.file_name().into_string().ok(),
+                Err(_) => None,
+            })
+            .collect::<Vec<_>>();
 
-//     // Check if there are files in chat folder
-//     let entries: Vec<_> = fs::read_dir(path)?.collect();
-//     if entries.is_empty() {
-//         return Ok(());
-//     }
+        // Use dialoguer to create a selection of file names
+        file_names.insert(0, "Skip".to_string());
+        file_names.push("Exit".to_string());
 
-//     // Get file names in a list
-//     let mut file_names = entries.into_iter().filter_map(|entry| {
-//         match entry {
-//             Ok(entry) => entry.file_name().into_string().ok(),
-//             Err(_) => None,
-//         }
-//     }).collect::<Vec<_>>();
+        let selection = Select::with_theme(&ColorfulTheme::default())
+            .with_prompt("Would you like to continue a previous chat?: ")
+            .items(&file_names)
+            .default(0)
+            .interact()
+            .unwrap();
 
-//     // Use dialoguer to create a selection of file names
-//     file_names.insert(0, "Skip".to_string());
-//     file_names.push("Exit".to_string());
+        match file_names[selection].as_str() {
+            "Exit" => std::process::exit(0),
+            "Skip" => return Err(()),
+            file_name => {
+                let file =
+                    fs::read_to_string(path.join(file_name)).expect("Failed to read the file");
+                chat = serde_json::from_str(&file).unwrap();
+                // file.read_to_string(&mut contents)
+                //     .expect("Failed to parse content");
 
-//     let selection = Select::new()
-//         .items(&file_names)
-//         .default(0)
-//         .interact()?;
-
-//     match file_names[selection].as_str() {
-//         "Exit" => std::process::exit(0),
-//         "Skip" => return Ok(()),
-//         file_name => {
-//             let mut file = fs::File::open(format!("{}{}", path, file_name))?;
-//             let mut contents = String::new();
-//             file.read_to_string(&mut contents)?;
-
-//             // Read as JSON content the selected file into an object of type OpenAIRequest
-//             // (Assuming OpenAIRequest is serde-serializable)
-//             let _open_ai_req: OpenAIRequest = serde_json::from_str(&contents)?;
-
-//             // Add actions to be done with open_ai_req object here...
-//         }
-//     }
-
-//     Ok(())
-// }
+                // Read as JSON content the selected file into an object of type OpenAIRequest
+                // (Assuming OpenAIRequest is serde-serializable)
+                // chat = serde_json::from_str(&contents);
+            }
+        }
+        Ok(chat)
+    }
+}
 
 pub fn save_chat(
     mut custom_file_name: Option<String>,

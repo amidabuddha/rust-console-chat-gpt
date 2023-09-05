@@ -11,7 +11,7 @@ use features::{
     format_request::format_request,
     help_info::help_info,
     load_from_file::load_from_file,
-    save_chat::{save_chat, save_chat_with_prompt},
+    save_chat::{check_saved, save_chat, save_chat_with_prompt},
 };
 
 mod helpers;
@@ -25,8 +25,8 @@ use helpers::utils::{
 };
 
 mod models;
-use models::config::ChatConfig;
 use models::enums::{Roles, UserActions};
+use models::{api::OpenAIRequest, config::ChatConfig};
 
 mod styling;
 use styling::styling::handle_code;
@@ -62,23 +62,28 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let assistant_prompt_color = &chat_config.chat.colors.assistant_prompt;
     let assistant_response_color = &chat_config.chat.colors.assistant_response;
 
-    // Set chat temperature
-    if chat_config.chat.adjust_temperature {
-        chat_config.chat.temperature = select_temperature(chat_config.chat.temperature);
-    }
+    // Resume chat
+    let mut conversation: OpenAIRequest;
+    if let Ok(saved) = check_saved(chat_path) {
+        conversation = saved;
+    } else {
+        // Set chat temperature
+        if chat_config.chat.adjust_temperature {
+            chat_config.chat.temperature = select_temperature(chat_config.chat.temperature);
+        }
 
-    // Set custom role
-    if chat_config.chat.role_selector {
-        let (default_role, roles) = role_selector(
-            config_path,
-            chat_config.chat.default_system_role,
-            chat_config.chat.roles,
-        );
-        chat_config.chat.default_system_role = default_role;
-        chat_config.chat.roles = roles;
+        // Set custom role
+        if chat_config.chat.role_selector {
+            let (default_role, roles) = role_selector(
+                config_path,
+                chat_config.chat.default_system_role,
+                chat_config.chat.roles,
+            );
+            chat_config.chat.default_system_role = default_role;
+            chat_config.chat.roles = roles;
+        }
+        conversation = init_conversation_message(&chat_config, &model)
     }
-    // Implement resume chat here?
-    let mut conversation = init_conversation_message(&chat_config, &model);
 
     while let Some(user_input) = get_user_input(&user_prompt_color) {
         match user_input {
