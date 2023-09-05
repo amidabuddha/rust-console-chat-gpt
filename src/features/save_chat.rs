@@ -1,30 +1,29 @@
 use chrono::prelude::*;
 use dialoguer::{theme::ColorfulTheme, Select};
-use serde_json;
 use std::{
-    fs::{self, File},
+    fs::File,
     io::Write,
     path::{Path, PathBuf},
 };
 
-use crate::helpers::utils::flush_lines::flush_lines;
-use crate::helpers::utils::user_input::read_user_input_no_whitespace;
+use crate::helpers::utils::{
+    fs_helpers::{open_parse_json, read_directory},
+    user_input::{flush_lines, read_user_input_no_whitespace},
+};
 use crate::models::api::OpenAIRequest;
 
 pub fn check_saved(path: &PathBuf) -> Result<OpenAIRequest, ()> {
-    // Check if there are files in chat folder
-    let entries: Vec<_> = fs::read_dir(path)
-        .expect("Failed to read the Diretory")
-        .collect();
     let chat: OpenAIRequest;
-    if entries.is_empty() {
+    // Check if there are files in chat folder
+    let files: Vec<_> = read_directory(path).collect();
+    if files.is_empty() {
         return Err(());
     } else {
         // Get file names in a list
-        let mut file_names = entries
+        let mut file_names = files
             .into_iter()
-            .filter_map(|entry| match entry {
-                Ok(entry) => entry.file_name().into_string().ok(),
+            .filter_map(|file| match file {
+                Ok(file) => file.file_name().into_string().ok(),
                 Err(_) => None,
             })
             .collect::<Vec<_>>();
@@ -44,15 +43,7 @@ pub fn check_saved(path: &PathBuf) -> Result<OpenAIRequest, ()> {
             "Exit" => std::process::exit(0),
             "Skip" => return Err(()),
             file_name => {
-                let file =
-                    fs::read_to_string(path.join(file_name)).expect("Failed to read the file");
-                chat = serde_json::from_str(&file).unwrap();
-                // file.read_to_string(&mut contents)
-                //     .expect("Failed to parse content");
-
-                // Read as JSON content the selected file into an object of type OpenAIRequest
-                // (Assuming OpenAIRequest is serde-serializable)
-                // chat = serde_json::from_str(&contents);
+                chat = open_parse_json(&path.join(file_name)).unwrap();
             }
         }
         Ok(chat)

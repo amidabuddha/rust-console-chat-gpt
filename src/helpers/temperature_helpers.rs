@@ -1,4 +1,4 @@
-use crate::helpers::utils::{flush_lines::flush_lines, user_input::read_user_input};
+use crate::helpers::utils::user_input::{flush_lines, read_user_input};
 
 pub fn select_temperature(mut chat_temperature: f64) -> f64 {
     let mut lines = 1;

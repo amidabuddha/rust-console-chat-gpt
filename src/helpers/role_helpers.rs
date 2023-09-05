@@ -3,9 +3,10 @@ use std::{collections::BTreeMap, path::PathBuf};
 use dialoguer::{theme::ColorfulTheme, Select};
 use toml::Value;
 
-use crate::helpers::utils::flush_lines::flush_lines;
-use crate::helpers::utils::toml_helpers::{open_parse_toml, serialize_write_toml};
-use crate::helpers::utils::user_input::{read_user_input, read_user_input_no_whitespace};
+use crate::helpers::utils::fs_helpers::{open_parse_toml, serialize_write_toml};
+use crate::helpers::utils::user_input::{
+    flush_lines, read_user_input, read_user_input_no_whitespace,
+};
 use crate::models::config::ChatConfig;
 
 pub fn set_system_role(chat_config: &ChatConfig) -> String {
@@ -118,7 +119,7 @@ fn update_toml_file_roles(
     default_role: String,
     role_list: &BTreeMap<String, String>,
 ) {
-    let mut toml = open_parse_toml(path);
+    let mut toml: Value = open_parse_toml(path).unwrap();
     update_roles_for_config(default_role, role_list, &mut toml);
     serialize_write_toml(path, &toml);
 }

@@ -2,7 +2,6 @@ use clearscreen::ClearScreen;
 use colored::*;
 use spinners::{Spinner, Spinners};
 use std::env;
-use toml;
 
 mod features;
 use features::{
@@ -15,13 +14,16 @@ use features::{
 };
 
 mod helpers;
-use helpers::api_helpers::{get_openai_response, init_conversation_message, set_message};
 use helpers::model_helper::select_model;
 use helpers::role_helpers::role_selector;
 use helpers::temperature_helpers::select_temperature;
 use helpers::utils::{
-    check_dir::confirm_or_create, flush_lines::flush_lines, toml_helpers::open_toml,
-    user_input::get_user_input,
+    fs_helpers::confirm_or_create,
+    user_input::{flush_lines, get_user_input},
+};
+use helpers::{
+    api_helpers::{get_openai_response, init_conversation_message, set_message},
+    utils::fs_helpers::open_parse_toml,
 };
 
 mod models;
@@ -42,8 +44,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     confirm_or_create(chat_path);
 
     // Read ChatConfig from config.toml
-    let toml_str = open_toml(config_path);
-    let mut chat_config: ChatConfig = toml::from_str(&toml_str)?;
+    let mut chat_config: ChatConfig = open_parse_toml(config_path).unwrap();
 
     // Select model
     let model = if chat_config.chat.model_selector {
