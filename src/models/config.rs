@@ -40,9 +40,9 @@ pub struct ChatColors {
 #[derive(Debug, Deserialize, Default)]
 pub struct ChatModel {
     pub model_name: String,
-    model_input_pricing_per_1k: f64,
-    model_output_pricing_per_1k: f64,
-    model_max_tokens: u64,
+    pub model_input_pricing_per_1k: f64,
+    pub model_output_pricing_per_1k: f64,
+    pub model_max_tokens: u64,
     pub api_key: String,
-    api_usage: f64,
+    pub api_usage: f64,
 }

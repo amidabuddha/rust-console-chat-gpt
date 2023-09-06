@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use colored::Colorize;
 use reqwest::{
@@ -8,10 +8,13 @@ use reqwest::{
 };
 use spinners::{Spinner, Spinners};
 
-use crate::models::{
-    api::{OpenAIMessage, OpenAIRequest, OpenAIResponse},
-    config::ChatConfig,
-    enums::Roles,
+use crate::{
+    features::calculate_costs::{calculate_costs, update_toml_file_api_usage},
+    models::{
+        api::{OpenAIMessage, OpenAIRequest, OpenAIResponse},
+        config::ChatConfig,
+        enums::Roles,
+    },
 };
 use crate::{
     features::save_chat::save_chat, helpers::utils::user_input::flush_lines,
@@ -59,6 +62,7 @@ pub async fn get_openai_response(
 
 pub async fn chat_completion(
     chat_config: &ChatConfig,
+    config_path: &PathBuf,
     base_path: &Path,
     mut conversation: OpenAIRequest,
     user_message: String,
@@ -66,7 +70,12 @@ pub async fn chat_completion(
     api_key: &String,
     assistant_prompt_color: &String,
     assistant_response_color: &String,
-) -> Result<OpenAIRequest, reqwest::Error> {
+    model: &String,
+    prompt_price: f64,
+    completion_price: f64,
+    mut chat_price: f64,
+    mut total_tokens: u64,
+) -> Result<(OpenAIRequest, f64, u64), reqwest::Error> {
     conversation
         .messages
         .push(set_message(Roles::USER, user_message));
@@ -91,6 +100,16 @@ pub async fn chat_completion(
         assistant_response_color.to_string(),
     );
     conversation.messages.push(assistant_message.to_owned());
+    let usage = response.usage;
+    total_tokens += usage.total_tokens;
+    let chat_iteration_price = calculate_costs(
+        usage.prompt_tokens,
+        usage.completion_tokens,
+        prompt_price,
+        completion_price,
+    );
+    update_toml_file_api_usage(model, config_path, chat_iteration_price);
+    chat_price += chat_iteration_price;
     if chat_config.chat.debug {
         save_chat(
             Some("messages".to_string()),
@@ -99,5 +118,5 @@ pub async fn chat_completion(
             false,
         );
     }
-    Ok(conversation)
+    Ok((conversation, chat_price, total_tokens))
 }

@@ -4,7 +4,7 @@ use std::env;
 mod features;
 mod styling;
 use features::{
-    calculate_costs::calculate_costs,
+    calculate_costs::print_costs,
     edit_latest::edit_latest,
     format_request::format_request,
     help_info::help_info,
@@ -64,6 +64,12 @@ pub async fn chat() -> Result<(), Box<dyn std::error::Error>> {
     let assistant_prompt_color = &chat_config.chat.colors.assistant_prompt;
     let assistant_response_color = &chat_config.chat.colors.assistant_response;
 
+    // Set model price and current chat costs
+    let prompt_price = &chat_config.chat.models[&model].model_input_pricing_per_1k;
+    let completion_price = &chat_config.chat.models[&model].model_output_pricing_per_1k;
+    let mut chat_price = 0.0;
+    let mut total_tokens = 0;
+
     // Resume chat
     let mut conversation: OpenAIRequest;
     if let Ok(saved) = check_saved(chat_path) {
@@ -94,8 +100,7 @@ pub async fn chat() -> Result<(), Box<dyn std::error::Error>> {
                 continue;
             }
             UserActions::COST => {
-                // TODO: implement
-                calculate_costs();
+                print_costs(&model, chat_price, total_tokens, &config_path);
                 continue;
             }
             UserActions::EDIT => {
@@ -123,8 +128,9 @@ pub async fn chat() -> Result<(), Box<dyn std::error::Error>> {
                 continue;
             }
             UserActions::FORMAT => {
-                conversation = chat_completion(
+                (conversation, chat_price, total_tokens) = chat_completion(
                     &chat_config,
+                    &config_path,
                     base_path,
                     conversation,
                     format_request(),
@@ -132,6 +138,11 @@ pub async fn chat() -> Result<(), Box<dyn std::error::Error>> {
                     api_key,
                     assistant_prompt_color,
                     assistant_response_color,
+                    &model,
+                    *prompt_price,
+                    *completion_price,
+                    chat_price,
+                    total_tokens,
                 )
                 .await
                 .unwrap();
@@ -141,8 +152,9 @@ pub async fn chat() -> Result<(), Box<dyn std::error::Error>> {
                 if user_message.is_empty() {
                     continue;
                 } else {
-                    conversation = chat_completion(
+                    (conversation, chat_price, total_tokens) = chat_completion(
                         &chat_config,
+                        &config_path,
                         base_path,
                         conversation,
                         user_message,
@@ -150,6 +162,11 @@ pub async fn chat() -> Result<(), Box<dyn std::error::Error>> {
                         api_key,
                         assistant_prompt_color,
                         assistant_response_color,
+                        &model,
+                        *prompt_price,
+                        *completion_price,
+                        chat_price,
+                        total_tokens,
                     )
                     .await
                     .unwrap();
@@ -163,8 +180,9 @@ pub async fn chat() -> Result<(), Box<dyn std::error::Error>> {
                 save_chat(None, chat_path, &conversation, true);
             }
             UserActions::INPUT(input) => {
-                conversation = chat_completion(
+                (conversation, chat_price, total_tokens) = chat_completion(
                     &chat_config,
+                    &config_path,
                     base_path,
                     conversation,
                     input,
@@ -172,6 +190,11 @@ pub async fn chat() -> Result<(), Box<dyn std::error::Error>> {
                     api_key,
                     assistant_prompt_color,
                     assistant_response_color,
+                    &model,
+                    *prompt_price,
+                    *completion_price,
+                    chat_price,
+                    total_tokens,
                 )
                 .await
                 .unwrap();

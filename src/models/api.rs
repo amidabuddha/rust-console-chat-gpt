@@ -23,9 +23,9 @@ pub struct OpenAIResponseChoices {
 
 #[derive(Serialize, Deserialize, Debug, Default)]
 pub struct OpenAIResponseUsage {
-    prompt_tokens: u64,
-    completion_tokens: u64,
-    total_tokens: u64,
+    pub prompt_tokens: u64,
+    pub completion_tokens: u64,
+    pub total_tokens: u64,
 }
 
 #[derive(Serialize, Deserialize, Debug, Default)]

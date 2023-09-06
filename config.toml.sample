@@ -3,15 +3,15 @@
 # Also, don't forget to place your Open API key
 
 [chat]
-temperature = 1
 adjust_temperature = true
-default_system_role = "dev"
-role_selector = true
-model_selector = true
-default_model = "gpt3"
-save_chat_on_exit = true
 debug = false
+default_model = "gpt3"
+default_system_role = "dev"
 last_completion_max_tokens = 400
+model_selector = true
+role_selector = true
+save_chat_on_exit = true
+temperature = 1
 
 [chat.api]
 base_url = "https://api.openai.com"
@@ -21,27 +21,27 @@ endpoint = "/v1/chat/completions"
 # Available colors:
 #         black, red, green, yellow, blue, magenta, cyan, white,
 #         light_grey, dark_grey, light_red, light_green, light_yellow, light_blue, light_magenta, light_cyan.
-user_prompt = "blue"
 assistant_prompt = "yellow"
-assistant_response = "cyan"
+assistant_response = "green"
+user_prompt = "blue"
 
 [chat.models.gpt3]
-model_name = "gpt-3.5-turbo"
-model_input_pricing_per_1k = 0.0015
-model_output_pricing_per_1k = 0.002
-model_max_tokens = 4096
 api_key = "YOUR_OPENAI_GPT3_API_KEY"
 # API usage is updated automatically!
-api_usage = 0
+api_usage = 0.0
+model_input_pricing_per_1k = 0.0015
+model_max_tokens = 4096
+model_name = "gpt-3.5-turbo"
+model_output_pricing_per_1k = 0.002
 
 [chat.models.gpt4]
-model_name = "gpt-4"
-model_input_pricing_per_1k = 0.03
-model_output_pricing_per_1k = 0.06
-model_max_tokens = 8192
 api_key = "YOUR_OPENAI_GPT4_API_KEY"
 # API usage is updated automatically!
-api_usage = 0
+api_usage = 0.0
+model_input_pricing_per_1k = 0.03
+model_max_tokens = 8192
+model_name = "gpt-4"
+model_output_pricing_per_1k = 0.06
 
 [chat.roles]
 ai_expert = "As an AI professional with a distinguished PhD in prompt engineering, you possess an extensive understanding of Artificial Intelligence, focusing on principles, techniques, and applications. Leverage your deep knowledge of Machine Learning and Neural Networks to provide specialized insights and solutions to complex problems. Ensure that your responses are delivered in a clear, coherent, and understandable manner, catering to both technical and non-technical audiences alike."
