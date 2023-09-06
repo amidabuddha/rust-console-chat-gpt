@@ -1,3 +1,4 @@
+// use dialoguer::Input;
 use serde_json;
 use std::fs;
 use std::fs::ReadDir;
@@ -6,6 +7,8 @@ use toml::Value;
 
 use crate::models::api::OpenAIRequest;
 use crate::models::config::ChatConfig;
+
+use super::user_input::read_user_input_no_whitespace;
 
 pub fn confirm_or_create(path: &PathBuf) {
     if !path.exists() {
@@ -38,4 +41,23 @@ pub fn serialize_write_toml(path: &PathBuf, toml: &Value) {
         toml::to_string(toml).expect("Failed to serialize TOML"),
     )
     .expect("Failed to write the file");
+}
+
+// pub fn prompt_file_path() -> PathBuf {
+//     let file_path: String = Input::new()
+//         .with_prompt("Please enter the file path: ")
+//         .interact_text()
+//         .unwrap();
+
+//     PathBuf::from(file_path)
+// }
+
+pub fn prompt_file_path() -> PathBuf {
+    println!("\"config.toml\" not found in the current directory!");
+    let file_path = read_user_input_no_whitespace(
+        "Please enter the config file name /with a path if not in the current directory/: "
+            .to_string(),
+    );
+
+    PathBuf::from(file_path)
 }

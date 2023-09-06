@@ -20,7 +20,7 @@ use helpers::{
     role_helpers::role_selector,
     temperature_helpers::select_temperature,
     utils::{
-        fs_helpers::{confirm_or_create, open_parse_toml_to_config},
+        fs_helpers::{confirm_or_create, open_parse_toml_to_config, prompt_file_path},
         user_input::{flush_lines, get_user_input},
     },
 };
@@ -36,14 +36,18 @@ use styling::styling::handle_code;
 pub async fn chat() -> Result<(), Box<dyn std::error::Error>> {
     let curent_exe = env::current_exe()?;
     let base_path = curent_exe.parent().unwrap();
-    let config_path = &base_path.join("config.toml");
+    let config_path = if base_path.join("config.toml").exists() {
+        base_path.join("config.toml")
+    } else {
+        prompt_file_path()
+    };
     let chat_path = &base_path.join("chats");
 
     // Create chats directory if it doesn't exist
     confirm_or_create(chat_path);
 
     // Read ChatConfig from config.toml
-    let mut chat_config: ChatConfig = open_parse_toml_to_config(config_path);
+    let mut chat_config: ChatConfig = open_parse_toml_to_config(&config_path);
 
     // Select model
     let model = if chat_config.chat.model_selector {
@@ -76,7 +80,7 @@ pub async fn chat() -> Result<(), Box<dyn std::error::Error>> {
         // Set custom role
         if chat_config.chat.role_selector {
             let (default_role, roles) = role_selector(
-                config_path,
+                &config_path,
                 chat_config.chat.default_system_role,
                 chat_config.chat.roles,
             );
