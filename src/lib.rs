@@ -1,9 +1,8 @@
 use clearscreen::ClearScreen;
-use colored::*;
-use spinners::{Spinner, Spinners};
 use std::env;
 
 mod features;
+mod styling;
 use features::{
     calculate_costs::calculate_costs,
     edit_latest::edit_latest,
@@ -15,22 +14,19 @@ use features::{
 
 mod helpers;
 use helpers::{
-    api_helpers::{get_openai_response, init_conversation_message, set_message},
+    api_helpers::{chat_completion, init_conversation_message},
     model_helper::select_model,
     role_helpers::role_selector,
     temperature_helpers::select_temperature,
     utils::{
         fs_helpers::{confirm_or_create, open_parse_toml_to_config, prompt_file_path},
-        user_input::{flush_lines, get_user_input},
+        user_input::get_user_input,
     },
 };
 
 mod models;
-use models::enums::{Roles, UserActions};
+use models::enums::UserActions;
 use models::{api::OpenAIRequest, config::ChatConfig};
-
-mod styling;
-use styling::styling::handle_code;
 
 #[tokio::main]
 pub async fn chat() -> Result<(), Box<dyn std::error::Error>> {
@@ -126,9 +122,18 @@ pub async fn chat() -> Result<(), Box<dyn std::error::Error>> {
                 continue;
             }
             UserActions::FORMAT => {
-                // TODO: implement
-                format_request();
-                continue;
+                conversation = chat_completion(
+                    &chat_config,
+                    base_path,
+                    conversation,
+                    format_request(),
+                    &url,
+                    api_key,
+                    assistant_prompt_color,
+                    assistant_response_color,
+                )
+                .await
+                .unwrap();
             }
             UserActions::FILE => {
                 // TODO: implement
@@ -143,39 +148,20 @@ pub async fn chat() -> Result<(), Box<dyn std::error::Error>> {
                 save_chat(None, chat_path, &conversation, true);
             }
             UserActions::INPUT(input) => {
-                conversation.messages.push(set_message(Roles::USER, input));
-
-                // Spinner start
-                let mut sp = Spinner::new(Spinners::Dots9, "Generating Output...".into());
-
-                let response = get_openai_response(&url, &api_key, &conversation).await?;
-
-                // Spinner stop
-                sp.stop_with_newline();
-                flush_lines(1);
-
-                let choices = response.choices;
-                let assistant_message = &choices[0].message;
-                print!(
-                    "{} ",
-                    "Assistant:".color(assistant_prompt_color.to_string())
-                );
-                handle_code(
-                    assistant_message.content.to_string(),
-                    assistant_response_color.to_string(),
-                );
-                conversation.messages.push(assistant_message.to_owned());
-                if chat_config.chat.debug {
-                    save_chat(
-                        Some("messages".to_string()),
-                        &base_path,
-                        &conversation,
-                        false,
-                    );
-                }
+                conversation = chat_completion(
+                    &chat_config,
+                    base_path,
+                    conversation,
+                    input,
+                    &url,
+                    api_key,
+                    assistant_prompt_color,
+                    assistant_response_color,
+                )
+                .await
+                .unwrap();
             }
         }
     }
-
     Ok(())
 }

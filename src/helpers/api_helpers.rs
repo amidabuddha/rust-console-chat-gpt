@@ -1,12 +1,22 @@
+use std::path::Path;
+
+use colored::Colorize;
 use reqwest::{
     self,
     header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},
     Client,
 };
+use spinners::{Spinner, Spinners};
 
-use crate::models::api::{OpenAIMessage, OpenAIRequest, OpenAIResponse};
-use crate::models::config::ChatConfig;
-use crate::models::enums::Roles;
+use crate::models::{
+    api::{OpenAIMessage, OpenAIRequest, OpenAIResponse},
+    config::ChatConfig,
+    enums::Roles,
+};
+use crate::{
+    features::save_chat::save_chat, helpers::utils::user_input::flush_lines,
+    styling::styling::handle_code,
+};
 
 use super::role_helpers::set_system_role;
 
@@ -45,4 +55,49 @@ pub async fn get_openai_response(
         .await?;
 
     Ok(response)
+}
+
+pub async fn chat_completion(
+    chat_config: &ChatConfig,
+    base_path: &Path,
+    mut conversation: OpenAIRequest,
+    user_message: String,
+    url: &String,
+    api_key: &String,
+    assistant_prompt_color: &String,
+    assistant_response_color: &String,
+) -> Result<OpenAIRequest, reqwest::Error> {
+    conversation
+        .messages
+        .push(set_message(Roles::USER, user_message));
+
+    // Spinner start
+    let mut sp = Spinner::new(Spinners::Dots9, "Generating Output...".into());
+
+    let response = get_openai_response(&url, &api_key, &conversation).await?;
+
+    // Spinner stop
+    sp.stop_with_newline();
+    flush_lines(1);
+
+    let choices = response.choices;
+    let assistant_message = &choices[0].message;
+    print!(
+        "{} ",
+        "Assistant:".color(assistant_prompt_color.to_string())
+    );
+    handle_code(
+        assistant_message.content.to_string(),
+        assistant_response_color.to_string(),
+    );
+    conversation.messages.push(assistant_message.to_owned());
+    if chat_config.chat.debug {
+        save_chat(
+            Some("messages".to_string()),
+            &base_path,
+            &conversation,
+            false,
+        );
+    }
+    Ok(conversation)
 }

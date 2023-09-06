@@ -1,4 +1,4 @@
-use std::io::{self, Write};
+use std::io::{self, BufRead, Write};
 
 use colored::*;
 use regex::Regex;
@@ -41,4 +41,17 @@ pub fn read_user_input_no_whitespace(prompt: String) -> String {
 pub fn flush_lines(lines: i32) {
     let escape_chars = format!("{}[F{}[K", 27 as char, 27 as char);
     print!("{}", escape_chars.repeat(lines as usize));
+}
+
+pub fn read_multiline() -> String {
+    let mut lines = io::stdin().lock().lines();
+    let mut multiline = String::new();
+    while let Some(Ok(line)) = lines.next() {
+        if line.trim() == "^D" {
+            break;
+        };
+        multiline.push_str(&line);
+        multiline.push('\n');
+    }
+    multiline
 }
