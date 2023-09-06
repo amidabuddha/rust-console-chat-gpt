@@ -55,3 +55,14 @@ pub fn read_multiline() -> String {
     }
     multiline
 }
+
+pub fn add_context(mut content: String) -> String {
+    let context = read_user_input(
+        "Add additional clarification before the formatted text or press 'ENTER' to continue: "
+            .to_string(),
+    );
+    if !context.is_empty() {
+        content = context + ":\n" + &content;
+    }
+    content
+}

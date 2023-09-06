@@ -35,6 +35,7 @@ pub async fn chat() -> Result<(), Box<dyn std::error::Error>> {
     let config_path = if base_path.join("config.toml").exists() {
         base_path.join("config.toml")
     } else {
+        println!("\"config.toml\" not found in the current directory!");
         prompt_file_path()
     };
     let chat_path = &base_path.join("chats");
@@ -136,9 +137,23 @@ pub async fn chat() -> Result<(), Box<dyn std::error::Error>> {
                 .unwrap();
             }
             UserActions::FILE => {
-                // TODO: implement
-                load_from_file();
-                continue;
+                let user_message = load_from_file();
+                if user_message.is_empty() {
+                    continue;
+                } else {
+                    conversation = chat_completion(
+                        &chat_config,
+                        base_path,
+                        conversation,
+                        user_message,
+                        &url,
+                        api_key,
+                        assistant_prompt_color,
+                        assistant_response_color,
+                    )
+                    .await
+                    .unwrap();
+                }
             }
             UserActions::HELP | UserActions::COMMANDS => {
                 help_info();

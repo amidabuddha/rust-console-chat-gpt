@@ -44,10 +44,8 @@ pub fn serialize_write_toml(path: &PathBuf, toml: &Value) {
 }
 
 pub fn prompt_file_path() -> PathBuf {
-    println!("\"config.toml\" not found in the current directory!");
     let file_path = read_user_input_no_whitespace(
-        "Please enter the config file name /with a path if not in the current directory/: "
-            .to_string(),
+        "Please enter the file name /with a path if not in the current directory/: ".to_string(),
     );
     PathBuf::from(file_path)
 }
