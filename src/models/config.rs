@@ -1,13 +1,13 @@
 #![allow(unused)]
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
-#[derive(Debug, Deserialize)]
+#[derive(Default, Deserialize, Serialize)]
 pub struct ChatConfig {
     pub chat: Chat,
 }
 
-#[derive(Debug, Deserialize, Default)]
+#[derive(Default, Deserialize, Serialize)]
 pub struct Chat {
     pub temperature: f64,
     pub adjust_temperature: bool,
@@ -24,20 +24,20 @@ pub struct Chat {
     pub roles: BTreeMap<String, String>,
 }
 
-#[derive(Debug, Deserialize, Default)]
+#[derive(Default, Deserialize, Serialize)]
 pub struct ChatApi {
     pub base_url: String,
     pub endpoint: String,
 }
 
-#[derive(Debug, Deserialize, Default)]
+#[derive(Default, Deserialize, Serialize)]
 pub struct ChatColors {
     pub user_prompt: String,
     pub assistant_prompt: String,
     pub assistant_response: String,
 }
 
-#[derive(Debug, Deserialize, Default)]
+#[derive(Deserialize, Serialize)]
 pub struct ChatModel {
     pub model_name: String,
     pub model_input_pricing_per_1k: f64,

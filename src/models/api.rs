@@ -1,34 +1,34 @@
 #![allow(unused)]
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Serialize, Deserialize, Debug, Default)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct OpenAIMessage {
     pub role: String,
     pub content: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Default)]
+#[derive(Deserialize, Serialize)]
 pub struct OpenAIRequest {
     pub model: String,
     pub temperature: f64,
     pub messages: Vec<OpenAIMessage>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Default)]
+#[derive(Debug, Deserialize)]
 pub struct OpenAIResponseChoices {
     index: u64,
     pub message: OpenAIMessage,
     finish_reason: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Default)]
+#[derive(Debug, Deserialize)]
 pub struct OpenAIResponseUsage {
     pub prompt_tokens: u64,
     pub completion_tokens: u64,
     pub total_tokens: u64,
 }
 
-#[derive(Serialize, Deserialize, Debug, Default)]
+#[derive(Debug, Deserialize)]
 pub struct OpenAIResponse {
     id: String,
     object: String,

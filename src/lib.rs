@@ -16,29 +16,27 @@ use features::{
 mod helpers;
 use helpers::{
     api_helpers::{chat_completion, init_conversation_message},
-    model_helper::select_model,
+    config_helpers::{default_config, get_api_key},
+    model_helpers::select_model,
     role_helpers::role_selector,
     temperature_helpers::select_temperature,
     utils::{
-        fs_helpers::{confirm_or_create, open_parse_toml_to_config, prompt_file_path},
+        fs_helpers::{confirm_or_create, open_parse_toml_to_config, serialize_write_toml},
         user_input::get_user_input,
     },
 };
 
 mod models;
-use models::enums::UserActions;
-use models::{api::OpenAIRequest, config::ChatConfig};
+use models::{api::OpenAIRequest, config::ChatConfig, enums::UserActions};
 
 #[tokio::main]
 pub async fn chat() -> Result<(), Box<dyn std::error::Error>> {
     let curent_exe = env::current_exe()?;
     let base_path = curent_exe.parent().unwrap();
-    let config_path = if base_path.join("config.toml").exists() {
-        base_path.join("config.toml")
-    } else {
-        println!("\"config.toml\" not found in the current directory!");
-        prompt_file_path()
+    if !base_path.join("config.toml").exists() {
+        serialize_write_toml(&base_path.join("config.toml"), &default_config())
     };
+    let config_path = base_path.join("config.toml");
     let chat_path = &base_path.join("chats");
 
     // Create chats directory if it doesn't exist
@@ -53,12 +51,21 @@ pub async fn chat() -> Result<(), Box<dyn std::error::Error>> {
     } else {
         chat_config.chat.default_model.to_owned()
     };
-    // Set API URL and API Key
+    // Set API URL
     let url = format!(
         "{}{}",
         &chat_config.chat.api.base_url, &chat_config.chat.api.endpoint
     );
-    let api_key = &chat_config.chat.models[&model].api_key;
+    // Set API Key
+    let mut api_key = chat_config.chat.models[&model].api_key.to_owned();
+    if [
+        "YOUR_OPENAI_GPT3_API_KEY".to_string(),
+        "YOUR_OPENAI_GPT4_API_KEY".to_string(),
+    ]
+    .contains(&api_key)
+    {
+        api_key = get_api_key(&config_path, &model);
+    };
 
     // Set chat colors
     let user_prompt_color = &chat_config.chat.colors.user_prompt;
@@ -123,7 +130,7 @@ pub async fn chat() -> Result<(), Box<dyn std::error::Error>> {
                     conversation,
                     format_request(),
                     &url,
-                    api_key,
+                    &api_key,
                     assistant_prompt_color,
                     assistant_response_color,
                     &model,
@@ -146,7 +153,7 @@ pub async fn chat() -> Result<(), Box<dyn std::error::Error>> {
                         conversation,
                         user_message,
                         &url,
-                        api_key,
+                        &api_key,
                         assistant_prompt_color,
                         assistant_response_color,
                         &model,
@@ -174,7 +181,7 @@ pub async fn chat() -> Result<(), Box<dyn std::error::Error>> {
                     conversation,
                     input,
                     &url,
-                    api_key,
+                    &api_key,
                     assistant_prompt_color,
                     assistant_response_color,
                     &model,
