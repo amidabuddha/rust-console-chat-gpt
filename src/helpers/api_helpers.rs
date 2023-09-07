@@ -14,7 +14,7 @@ use crate::{
         flush_chat::flush_chat,
         save_chat::save_chat,
     },
-    helpers::utils::user_input::flush_lines,
+    helpers::{role_helpers::set_system_role, utils::user_input::flush_lines},
     models::{
         api::{OpenAIMessage, OpenAIRequest, OpenAIResponse},
         config::ChatConfig,
@@ -22,8 +22,6 @@ use crate::{
     },
     styling::styling::handle_code,
 };
-
-use super::role_helpers::set_system_role;
 
 pub fn init_conversation_message(chat_config: &ChatConfig, model: &String) -> OpenAIRequest {
     let system_role = set_system_role(chat_config);

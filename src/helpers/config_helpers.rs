@@ -1,17 +1,23 @@
 use std::path::PathBuf;
 use toml::{self, Value};
 
-use super::utils::{
+use crate::helpers::utils::{
     fs_helpers::{open_parse_toml_to_value, serialize_write_toml},
-    user_input::read_user_input_no_whitespace,
+    user_input::{flush_lines, read_user_input_no_whitespace},
 };
 
 pub fn get_api_key(config_path: &PathBuf, model: &String) -> String {
-    let key = read_user_input_no_whitespace("Please enter your OpenAI API key: ".to_string());
+    let mut lines = 1;
+    let mut key = "".to_string();
+    while key.is_empty() {
+        lines += 1;
+        key = read_user_input_no_whitespace("Please enter your OpenAI API key: ".to_string());
+    }
+    flush_lines(lines);
     let mut toml: Value = open_parse_toml_to_value(config_path);
     toml["chat"]["models"][&model]["api_key"] = toml::Value::String(key.to_string());
     serialize_write_toml(config_path, &toml);
-    key
+    return key;
 }
 
 pub fn default_config() -> toml::Value {

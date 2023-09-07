@@ -5,10 +5,10 @@ use std::fs::ReadDir;
 use std::path::PathBuf;
 use toml::Value;
 
-use crate::models::api::OpenAIRequest;
-use crate::models::config::ChatConfig;
-
-use super::user_input::read_user_input_no_whitespace;
+use crate::{
+    helpers::utils::user_input::read_user_input_no_whitespace,
+    models::{api::OpenAIRequest, config::ChatConfig},
+};
 
 pub fn confirm_or_create(path: &PathBuf) {
     if !path.exists() {

@@ -3,11 +3,13 @@ use std::{collections::BTreeMap, path::PathBuf};
 use dialoguer::{theme::ColorfulTheme, Select};
 use toml::Value;
 
-use crate::helpers::utils::{
-    fs_helpers::{open_parse_toml_to_value, serialize_write_toml},
-    user_input::{flush_lines, read_user_input, read_user_input_no_whitespace},
+use crate::{
+    helpers::utils::{
+        fs_helpers::{open_parse_toml_to_value, serialize_write_toml},
+        user_input::{flush_lines, read_user_input, read_user_input_no_whitespace},
+    },
+    models::config::ChatConfig,
 };
-use crate::models::config::ChatConfig;
 
 pub fn set_system_role(chat_config: &ChatConfig) -> String {
     chat_config

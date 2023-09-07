@@ -1,12 +1,11 @@
+use clearscreen::ClearScreen;
 use std::path::PathBuf;
 
 use crate::{
+    features::save_chat::save_chat_with_prompt,
     helpers::api_helpers::init_conversation_message,
     models::{api::OpenAIRequest, config::ChatConfig},
 };
-use clearscreen::ClearScreen;
-
-use super::save_chat::save_chat_with_prompt;
 
 pub fn flush_chat(
     chat_config: &ChatConfig,
