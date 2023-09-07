@@ -58,7 +58,9 @@ The script should work fine in Linux and macOS* terminals. Yet to be tested on W
 
 2. Build the source or download the latest binary + config archive from [Releases](https://github.com/amidabuddha/rust-console-chat-gpt/releases)
 
-3. Enjoy
+3. Run the app and type "help" in the User prompt for a list of supported commands
+
+4. Enjoy ;)
 
 ---
 \* code syntax highlighting may look weird in the default macOS terminal
