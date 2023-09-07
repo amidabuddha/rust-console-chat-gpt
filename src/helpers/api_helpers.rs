@@ -9,16 +9,19 @@ use reqwest::{
 use spinners::{Spinner, Spinners};
 
 use crate::{
-    features::calculate_costs::{calculate_costs, update_toml_file_api_usage},
+    features::save_chat::save_chat, helpers::utils::user_input::flush_lines,
+    styling::styling::handle_code,
+};
+use crate::{
+    features::{
+        calculate_costs::{calculate_costs, update_toml_file_api_usage},
+        save_chat::save_chat_with_prompt,
+    },
     models::{
         api::{OpenAIMessage, OpenAIRequest, OpenAIResponse},
         config::ChatConfig,
         enums::Roles,
     },
-};
-use crate::{
-    features::save_chat::save_chat, helpers::utils::user_input::flush_lines,
-    styling::styling::handle_code,
 };
 
 use super::role_helpers::set_system_role;
@@ -62,6 +65,7 @@ pub async fn get_openai_response(
 
 pub async fn chat_completion(
     chat_config: &ChatConfig,
+    chat_path: &PathBuf,
     config_path: &PathBuf,
     base_path: &Path,
     mut conversation: OpenAIRequest,
@@ -83,7 +87,17 @@ pub async fn chat_completion(
     // Spinner start
     let mut sp = Spinner::new(Spinners::Dots9, "Generating Output...".into());
 
-    let response = get_openai_response(&url, &api_key, &conversation).await?;
+    let response = match get_openai_response(&url, &api_key, &conversation).await {
+        Ok(response) => response,
+        Err(err) => {
+            sp.stop_with_newline();
+            flush_lines(1);
+            println!("Something went wrong...");
+            save_chat_with_prompt(chat_path, &conversation);
+            println!("{}", err);
+            std::process::exit(1)
+        }
+    };
 
     // Spinner stop
     sp.stop_with_newline();

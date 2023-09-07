@@ -130,6 +130,7 @@ pub async fn chat() -> Result<(), Box<dyn std::error::Error>> {
             UserActions::FORMAT => {
                 (conversation, chat_price, total_tokens) = chat_completion(
                     &chat_config,
+                    chat_path,
                     &config_path,
                     base_path,
                     conversation,
@@ -154,6 +155,7 @@ pub async fn chat() -> Result<(), Box<dyn std::error::Error>> {
                 } else {
                     (conversation, chat_price, total_tokens) = chat_completion(
                         &chat_config,
+                        chat_path,
                         &config_path,
                         base_path,
                         conversation,
@@ -182,6 +184,7 @@ pub async fn chat() -> Result<(), Box<dyn std::error::Error>> {
             UserActions::INPUT(input) => {
                 (conversation, chat_price, total_tokens) = chat_completion(
                     &chat_config,
+                    chat_path,
                     &config_path,
                     base_path,
                     conversation,
