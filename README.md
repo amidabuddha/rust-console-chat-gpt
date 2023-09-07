@@ -61,3 +61,4 @@ The script should work fine in Linux and macOS* terminals. Yet to be tested on W
 3. Enjoy
 
 ---
+\* code syntax highlighting may look weird in the defaul macOS terminal
