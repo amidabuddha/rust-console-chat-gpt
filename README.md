@@ -56,7 +56,7 @@ The script should work fine in Linux and macOS* terminals. Yet to be tested on W
 
 1. Get your API key from [HERE](https://platform.openai.com/account/api-keys)
 
-5. Build the source or download the latest binary + config archive from [Releases](https://github.com/amidabuddha/rust-console-chat-gpt/releases)
+2. Build the source or download the latest binary + config archive from [Releases](https://github.com/amidabuddha/rust-console-chat-gpt/releases)
 
 3. Enjoy
 
