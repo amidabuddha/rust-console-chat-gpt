@@ -5,6 +5,7 @@ mod styling;
 use features::{
     calculate_costs::print_costs,
     edit_latest::edit_latest,
+    exit_chat::exit_chat,
     flush_chat::flush_chat,
     format_request::format_request,
     help_info::help_info,
@@ -92,7 +93,7 @@ pub async fn chat() -> Result<(), Box<dyn std::error::Error>> {
         }
         conversation = init_conversation_message(&chat_config, &model)
     }
-
+    //Start conversation
     while let Some(user_input) = get_user_input(&user_prompt_color) {
         match user_input {
             UserActions::NONE => {
@@ -109,13 +110,7 @@ pub async fn chat() -> Result<(), Box<dyn std::error::Error>> {
                     conversation = edit_latest(conversation, &user_prompt_color);
                 }
             }
-            UserActions::EXIT => {
-                if chat_config.chat.save_chat_on_exit {
-                    save_chat(None, chat_path, &conversation, true);
-                }
-                println!("Goodbye!");
-                break;
-            }
+            UserActions::EXIT => exit_chat(&chat_config, chat_path, &conversation),
             UserActions::FLUSH => {
                 conversation = flush_chat(&chat_config, &model, chat_path, conversation);
             }
