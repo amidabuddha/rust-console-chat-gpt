@@ -1,4 +1,3 @@
-use clearscreen::ClearScreen;
 use std::env;
 
 mod features;
@@ -6,6 +5,7 @@ mod styling;
 use features::{
     calculate_costs::print_costs,
     edit_latest::edit_latest,
+    flush_chat::flush_chat,
     format_request::format_request,
     help_info::help_info,
     load_from_file::load_from_file,
@@ -97,11 +97,9 @@ pub async fn chat() -> Result<(), Box<dyn std::error::Error>> {
         match user_input {
             UserActions::NONE => {
                 println!("Please enter your message!");
-                continue;
             }
             UserActions::COST => {
                 print_costs(&model, chat_price, total_tokens, &config_path);
-                continue;
             }
             UserActions::EDIT => {
                 if conversation.messages.len() < 2 {
@@ -110,7 +108,6 @@ pub async fn chat() -> Result<(), Box<dyn std::error::Error>> {
                     save_chat_with_prompt(chat_path, &conversation);
                     conversation = edit_latest(conversation, &user_prompt_color);
                 }
-                continue;
             }
             UserActions::EXIT => {
                 if chat_config.chat.save_chat_on_exit {
@@ -120,12 +117,7 @@ pub async fn chat() -> Result<(), Box<dyn std::error::Error>> {
                 break;
             }
             UserActions::FLUSH => {
-                save_chat_with_prompt(chat_path, &conversation);
-                ClearScreen::default()
-                    .clear()
-                    .expect("failed to clear the screen");
-                conversation = init_conversation_message(&chat_config, &model);
-                continue;
+                conversation = flush_chat(&chat_config, &model, chat_path, conversation);
             }
             UserActions::FORMAT => {
                 (conversation, chat_price, total_tokens) = chat_completion(
@@ -150,9 +142,7 @@ pub async fn chat() -> Result<(), Box<dyn std::error::Error>> {
             }
             UserActions::FILE => {
                 let user_message = load_from_file();
-                if user_message.is_empty() {
-                    continue;
-                } else {
+                if !user_message.is_empty() {
                     (conversation, chat_price, total_tokens) = chat_completion(
                         &chat_config,
                         chat_path,
@@ -176,7 +166,6 @@ pub async fn chat() -> Result<(), Box<dyn std::error::Error>> {
             }
             UserActions::HELP | UserActions::COMMANDS => {
                 help_info();
-                continue;
             }
             UserActions::SAVE => {
                 save_chat(None, chat_path, &conversation, true);

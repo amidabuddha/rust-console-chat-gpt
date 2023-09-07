@@ -1,6 +1,6 @@
 [package]
 name = "rust-console-chat-gpt"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2021"
 authors = ["Stefan"]
 license = "MIT OR Apache-2.0"

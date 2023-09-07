@@ -9,19 +9,18 @@ use reqwest::{
 use spinners::{Spinner, Spinners};
 
 use crate::{
-    features::save_chat::save_chat, helpers::utils::user_input::flush_lines,
-    styling::styling::handle_code,
-};
-use crate::{
     features::{
         calculate_costs::{calculate_costs, update_toml_file_api_usage},
-        save_chat::save_chat_with_prompt,
+        flush_chat::flush_chat,
+        save_chat::save_chat,
     },
+    helpers::utils::user_input::flush_lines,
     models::{
         api::{OpenAIMessage, OpenAIRequest, OpenAIResponse},
         config::ChatConfig,
         enums::Roles,
     },
+    styling::styling::handle_code,
 };
 
 use super::role_helpers::set_system_role;
@@ -87,50 +86,52 @@ pub async fn chat_completion(
     // Spinner start
     let mut sp = Spinner::new(Spinners::Dots9, "Generating Output...".into());
 
-    let response = match get_openai_response(&url, &api_key, &conversation).await {
-        Ok(response) => response,
-        Err(err) => {
-            sp.stop_with_newline();
-            flush_lines(1);
-            println!("Something went wrong...");
-            save_chat_with_prompt(chat_path, &conversation);
-            println!("{}", err);
-            std::process::exit(1)
-        }
-    };
+    let result = get_openai_response(&url, &api_key, &conversation).await;
+    let response;
 
-    // Spinner stop
-    sp.stop_with_newline();
-    flush_lines(1);
+    if result.is_ok() {
+        response = result.unwrap();
 
-    let choices = response.choices;
-    let assistant_message = &choices[0].message;
-    print!(
-        "{} ",
-        "Assistant:".color(assistant_prompt_color.to_string())
-    );
-    handle_code(
-        assistant_message.content.to_string(),
-        assistant_response_color.to_string(),
-    );
-    conversation.messages.push(assistant_message.to_owned());
-    let usage = response.usage;
-    total_tokens += usage.total_tokens;
-    let chat_iteration_price = calculate_costs(
-        usage.prompt_tokens,
-        usage.completion_tokens,
-        prompt_price,
-        completion_price,
-    );
-    update_toml_file_api_usage(model, config_path, chat_iteration_price);
-    chat_price += chat_iteration_price;
-    if chat_config.chat.debug {
-        save_chat(
-            Some("messages".to_string()),
-            &base_path,
-            &conversation,
-            false,
+        // Spinner stop
+        sp.stop_with_newline();
+        flush_lines(1);
+
+        let choices = response.choices;
+        let assistant_message = &choices[0].message;
+        print!(
+            "{} ",
+            "Assistant:".color(assistant_prompt_color.to_string())
         );
+        handle_code(
+            assistant_message.content.to_string(),
+            assistant_response_color.to_string(),
+        );
+        conversation.messages.push(assistant_message.to_owned());
+        let usage = response.usage;
+        total_tokens += usage.total_tokens;
+        let chat_iteration_price = calculate_costs(
+            usage.prompt_tokens,
+            usage.completion_tokens,
+            prompt_price,
+            completion_price,
+        );
+        update_toml_file_api_usage(model, config_path, chat_iteration_price);
+        chat_price += chat_iteration_price;
+        if chat_config.chat.debug {
+            save_chat(
+                Some("messages".to_string()),
+                &base_path,
+                &conversation,
+                false,
+            );
+        }
+        Ok((conversation, chat_price, total_tokens))
+    } else {
+        let err = result.unwrap_err();
+        sp.stop_with_newline();
+        flush_lines(1);
+        println!("{}", format!("Something went wrong...: {}", err));
+        conversation = flush_chat(chat_config, model, chat_path, conversation);
+        Ok((conversation, chat_price, total_tokens))
     }
-    Ok((conversation, chat_price, total_tokens))
 }
