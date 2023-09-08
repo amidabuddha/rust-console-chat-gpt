@@ -19,6 +19,5 @@ pub fn select_model(config: &ChatConfig) -> String {
         .items(&model_names)
         .interact()
         .unwrap_or_default();
-    flush_lines(1);
     gpt_models[selection].0.to_string()
 }
