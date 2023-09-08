@@ -83,12 +83,9 @@ pub async fn chat_completion(
 
     // Spinner start
     let mut sp = Spinner::new(Spinners::Dots9, "Generating Output...".into());
-
-    let result = get_openai_response(&url, &api_key, &conversation).await;
-    let response;
-
-    if result.is_ok() {
-        response = result.unwrap();
+    let request = get_openai_response(&url, &api_key, &conversation).await;
+    if request.is_ok() {
+        let response = request.unwrap();
 
         // Spinner stop
         sp.stop_with_newline();
@@ -125,10 +122,12 @@ pub async fn chat_completion(
         }
         Ok((conversation, chat_price, total_tokens))
     } else {
-        let err = result.unwrap_err();
         sp.stop_with_newline();
         flush_lines(1);
-        println!("{}", format!("Something went wrong...: {}", err));
+        println!(
+            "{}",
+            format!("Something went wrong...: {}", request.unwrap_err())
+        );
         conversation = flush_chat(chat_config, model, chat_path, conversation);
         Ok((conversation, chat_price, total_tokens))
     }

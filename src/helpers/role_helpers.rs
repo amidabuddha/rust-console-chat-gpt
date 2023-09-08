@@ -30,12 +30,18 @@ pub fn role_selector(
     mut role_list: BTreeMap<String, String>,
 ) -> (String, BTreeMap<String, String>) {
     io::stdout().flush().unwrap();
-    let role_names = get_role_names(&role_list);
+    let role_names = get_role_names(&role_list, &default_role);
     // TODO: implement preview to display role description in the selector list
     let role_name = get_selected_role(&default_role, &role_names);
     flush_lines(1);
     match role_names[role_name].as_str() {
-        "Default" => {}
+        "Default" => {
+            if !role_list.contains_key(&default_role) {
+                println!("Default role is undefined!");
+                (default_role, role_list) = custom_role_with_title(default_role, role_list);
+                update_toml_file_roles(path, default_role.clone(), &role_list);
+            }
+        }
         "Exit" => std::process::exit(0),
         "Add new system behavior" => {
             (default_role, role_list) = custom_role(role_list);
@@ -63,10 +69,10 @@ pub fn role_selector(
     (default_role, role_list)
 }
 
-fn get_role_names(role_list: &BTreeMap<String, String>) -> Vec<String> {
+fn get_role_names(role_list: &BTreeMap<String, String>, default_role: &String) -> Vec<String> {
     let mut names: Vec<String> = role_list
         .iter()
-        .filter(|(key, _)| !key.contains("dev"))
+        .filter(|(key, _)| !key.contains(default_role))
         .map(|(key, _)| key.clone())
         .collect();
     names.push("Add new system behavior".to_string());
@@ -87,37 +93,44 @@ fn get_selected_role(default_role: &str, role_names: &[String]) -> usize {
         .unwrap()
 }
 
-fn custom_role(mut role_list: BTreeMap<String, String>) -> (String, BTreeMap<String, String>) {
+fn custom_role(role_list: BTreeMap<String, String>) -> (String, BTreeMap<String, String>) {
     let mut lines = 0;
     loop {
         lines += 1;
-        let user_input =
+        let custom_role =
             read_user_input_no_whitespace("Enter a title for the new role: ".to_string());
-        if user_input.is_empty() {
+        if custom_role.is_empty() {
             println!("Please fill the title!");
             lines += 1;
             continue;
         }
-        if role_list.contains_key(&user_input) {
+        if role_list.contains_key(&custom_role) {
             println!("Such role name already exists!");
             lines += 1;
             continue;
         }
-        let custom_role = user_input;
-        loop {
+        flush_lines(lines);
+        return custom_role_with_title(custom_role, role_list);
+    }
+}
+
+fn custom_role_with_title(
+    role_name: String,
+    mut role_list: BTreeMap<String, String>,
+) -> (String, BTreeMap<String, String>) {
+    let mut lines = 0;
+    loop {
+        lines += 1;
+        let user_input =
+            read_user_input("Enter a detailed description of your assistant role: ".to_string());
+        if user_input.is_empty() {
+            println!("Please fill the description!");
             lines += 1;
-            let user_input = read_user_input(
-                "Enter a detailed description of your assistant role: ".to_string(),
-            );
-            if user_input.is_empty() {
-                println!("Please fill the description!");
-                lines += 1;
-                continue;
-            }
-            flush_lines(lines);
-            role_list.insert(custom_role.to_string(), user_input);
-            return (custom_role, role_list);
+            continue;
         }
+        flush_lines(lines);
+        role_list.insert(role_name.to_string(), user_input);
+        return (role_name, role_list);
     }
 }
 
@@ -144,21 +157,23 @@ fn update_roles_for_config(
     if let Some(chat) = toml.get_mut("chat").and_then(|v| v.as_table_mut()) {
         chat.insert("roles".to_string(), toml::Value::Table(role_list_toml));
     }
-    loop {
-        lines += 1;
-        let user_input = read_user_input_no_whitespace(
+    if !(toml["chat"]["default_system_role"] == toml::Value::String(default_role.to_owned())) {
+        loop {
+            lines += 1;
+            let user_input = read_user_input_no_whitespace(
             "Would you like to have this custom role as the default role in future chats? y/n: "
                 .to_string(),
         );
-        if user_input.is_empty() || user_input == "n".to_string() {
-            break;
+            if user_input.is_empty() || user_input == "n".to_string() {
+                break;
+            }
+            if user_input == "y".to_string() {
+                toml["chat"]["default_system_role"] = toml::Value::String(default_role.into());
+                break;
+            }
+            println!("Please confirm your choice with \"y\" or \"n\"");
+            lines += 1;
         }
-        if user_input == "y".to_string() {
-            toml["chat"]["default_system_role"] = toml::Value::String(default_role.into());
-            break;
-        }
-        println!("Please confirm your choice with \"y\" or \"n\"");
-        lines += 1;
     }
     flush_lines(lines);
 }

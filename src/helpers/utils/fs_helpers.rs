@@ -3,7 +3,7 @@ use serde_json;
 use std::fs;
 use std::fs::ReadDir;
 use std::path::PathBuf;
-use toml::Value;
+use toml::{de::Error, Value};
 
 use crate::{
     helpers::utils::user_input::read_user_input_no_whitespace,
@@ -24,7 +24,16 @@ pub fn read_file(path: &PathBuf) -> String {
 }
 
 pub fn open_parse_toml_to_config(path: &PathBuf) -> ChatConfig {
-    toml::from_str(&read_file(path)).expect("Failed to parse TOML")
+    let toml: Result<ChatConfig, Error> = toml::from_str(&read_file(path));
+    if toml.is_ok() {
+        toml.unwrap()
+    } else {
+        println!(
+            "{}",
+            format!("Issues with configuration file: {}", toml.unwrap_err())
+        );
+        std::process::exit(0)
+    }
 }
 
 pub fn open_parse_toml_to_value(path: &PathBuf) -> Value {
