@@ -33,7 +33,6 @@ pub fn role_selector(
     let role_names = get_role_names(&role_list, &default_role);
     // TODO: implement preview to display role description in the selector list
     let role_name = get_selected_role(&default_role, &role_names);
-    flush_lines(1);
     match role_names[role_name].as_str() {
         "Default" => {
             if !role_list.contains_key(&default_role) {
