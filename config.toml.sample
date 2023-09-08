@@ -7,11 +7,11 @@ adjust_temperature = true
 debug = false
 default_model = "gpt3"
 default_system_role = "dev"
+default_temperature = 1
 last_completion_max_tokens = 400
 model_selector = true
 role_selector = true
 save_chat_on_exit = true
-temperature = 1
 
 [chat.api]
 base_url = "https://api.openai.com"

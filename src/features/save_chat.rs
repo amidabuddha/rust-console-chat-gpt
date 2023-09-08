@@ -2,7 +2,7 @@ use chrono::prelude::*;
 use dialoguer::{theme::ColorfulTheme, Select};
 use std::{
     fs::File,
-    io::Write,
+    io::{self, Write},
     path::{Path, PathBuf},
 };
 
@@ -31,14 +31,14 @@ pub fn check_saved(path: &PathBuf) -> Result<OpenAIRequest, ()> {
         // Use dialoguer to create a selection of file names
         file_names.insert(0, "Skip".to_string());
         file_names.push("Exit".to_string());
-
+        io::stdout().flush().unwrap();
         let selection = Select::with_theme(&ColorfulTheme::default())
             .with_prompt("Would you like to continue a previous chat?: ")
             .items(&file_names)
             .default(0)
             .interact()
             .unwrap();
-
+        flush_lines(1);
         match file_names[selection].as_str() {
             "Exit" => std::process::exit(0),
             "Skip" => return Err(()),

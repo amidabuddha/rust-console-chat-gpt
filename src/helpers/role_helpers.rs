@@ -1,4 +1,8 @@
-use std::{collections::BTreeMap, path::PathBuf};
+use std::{
+    collections::BTreeMap,
+    io::{self, Write},
+    path::PathBuf,
+};
 
 use dialoguer::{theme::ColorfulTheme, Select};
 use toml::Value;
@@ -25,6 +29,7 @@ pub fn role_selector(
     mut default_role: String,
     mut role_list: BTreeMap<String, String>,
 ) -> (String, BTreeMap<String, String>) {
+    io::stdout().flush().unwrap();
     let role_names = get_role_names(&role_list);
     // TODO: implement preview to display role description in the selector list
     let role_name = get_selected_role(&default_role, &role_names);

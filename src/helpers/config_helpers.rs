@@ -7,7 +7,7 @@ use crate::helpers::utils::{
 };
 
 pub fn get_api_key(config_path: &PathBuf, model: &String) -> String {
-    let mut lines = 1;
+    let mut lines = 0;
     let mut key = "".to_string();
     while key.is_empty() {
         lines += 1;
@@ -31,11 +31,11 @@ pub fn default_config() -> toml::Value {
         debug = false
         default_model = "gpt3"
         default_system_role = "dev"
+        default_temperature = 1
         last_completion_max_tokens = 400
         model_selector = true
         role_selector = true
         save_chat_on_exit = true
-        temperature = 1
         
         [chat.api]
         base_url = "https://api.openai.com"

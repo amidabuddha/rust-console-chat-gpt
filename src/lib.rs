@@ -85,7 +85,8 @@ pub async fn chat() -> Result<(), Box<dyn std::error::Error>> {
     } else {
         // Set chat temperature
         if chat_config.chat.adjust_temperature {
-            chat_config.chat.temperature = select_temperature(chat_config.chat.temperature);
+            chat_config.chat.default_temperature =
+                select_temperature(chat_config.chat.default_temperature);
         }
 
         // Set custom role

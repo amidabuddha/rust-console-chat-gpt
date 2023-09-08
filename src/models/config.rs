@@ -9,15 +9,15 @@ pub struct ChatConfig {
 
 #[derive(Default, Deserialize, Serialize)]
 pub struct Chat {
-    pub temperature: f64,
     pub adjust_temperature: bool,
-    pub default_system_role: String,
-    pub role_selector: bool,
-    pub model_selector: bool,
-    pub default_model: String,
-    pub save_chat_on_exit: bool,
     pub debug: bool,
+    pub default_model: String,
+    pub default_system_role: String,
+    pub default_temperature: f64,
     pub last_completion_max_tokens: u64,
+    pub model_selector: bool,
+    pub role_selector: bool,
+    pub save_chat_on_exit: bool,
     pub api: ChatApi,
     pub colors: ChatColors,
     pub models: BTreeMap<String, ChatModel>,

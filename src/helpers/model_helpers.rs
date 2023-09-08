@@ -1,6 +1,8 @@
 use crate::models::config::ChatConfig;
 use dialoguer::{theme::ColorfulTheme, Select};
 
+use super::utils::user_input::flush_lines;
+
 pub fn select_model(config: &ChatConfig) -> String {
     let mut gpt_models: Vec<(String, String)> = Vec::new();
     for (key, value) in &config.chat.models {
@@ -17,5 +19,6 @@ pub fn select_model(config: &ChatConfig) -> String {
         .items(&model_names)
         .interact()
         .unwrap_or_default();
+    flush_lines(1);
     gpt_models[selection].0.to_string()
 }
